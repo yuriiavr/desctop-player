@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>My Music Player</h1>
+    <input type="text" id="playlistName" placeholder="Enter playlist name" />
+    <button id="createPlaylistButton">Create New Playlist</button>
+    <button id="savePlaylistButton">Save Playlist</button>
+    
+    <div>
+        <h2>Available Playlists</h2>
+        <div id="playlistsDiv" class="playlists-container" onclick="togglePlaylistDropdown()">Select Playlist</div>
+        <div id="playlistsDropdown" class="playlists-dropdown" style="display: none;"></div>
+        <button id="renamePlaylistButton">Rename Playlist</button>
+        <button id="deletePlaylistButton">Delete Playlist</button>
+    </div>
+
+    <button onclick="selectFiles()">Add Songs</button>
+    <button onclick="play()">Play</button>
+    <button onclick="next()">Next</button>
+    <button onclick="previous()">Previous</button>
+
+    <div>
+        <span id="currentTime">0:00</span>
+        <input type="range" id="progressBar" min="0" max="100" value="0">
+        <span id="durationTime">0:00</span>
+    </div>
+    <div>
+        <label for="volumeControl">Volume:</label>
+        <input type="range" id="volumeControl" min="0" max="1" step="0.01">
+    </div>
+
+    <div>
+        <label for="searchInput">Search Songs:</label>
+        <input type="text" id="searchInput" placeholder="Search by title or artist">
+    </div>
+    <div>
+        <label for="sortSelect">Sort By:</label>
+        <select id="sortSelect">
+            <option value="date">Date Added</option>
+            <option value="title">Title</option>
+            <option value="artist">Artist</option>
+        </select>
+    </div>
+
+    <h2>Songs in Playlist</h2>
+    <ul id="playlist"></ul>
+
+    <div id="renamePlaylistModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span id="closeRenameModal" class="close">&times;</span>
+            <h2>Rename Playlist</h2>
+            <input type="text" id="renamePlaylistInput" />
+            <button id="confirmRenameButton">Rename</button>
+            <button id="cancelRenameButton">Cancel</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
