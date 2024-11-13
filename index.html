@@ -1,66 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Music Player</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>My Music Player</h1>
-    <input type="text" id="playlistName" placeholder="Enter playlist name" />
-    <button id="createPlaylistButton">Create New Playlist</button>
-    <button id="savePlaylistButton">Save Playlist</button>
-    
-    <div>
-        <h2>Available Playlists</h2>
-        <div id="playlistsDiv" class="playlists-container" onclick="togglePlaylistDropdown()">Select Playlist</div>
-        <div id="playlistsDropdown" class="playlists-dropdown" style="display: none;"></div>
-        <button id="renamePlaylistButton">Rename Playlist</button>
-        <button id="deletePlaylistButton">Delete Playlist</button>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body style="background-image: url('img/back.jpg'); background-size: cover">
+    <div id="renameTrackModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <span id="closeRenameTrackModal" class="close">&times;</span>
+        <h2>Rename Track</h2>
+        <input type="text" id="renameTrackInput" />
+        <button id="confirmRenameTrackButton">Rename</button>
+        <button id="cancelRenameTrackButton">Cancel</button>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="player">
+        <div class="song-back-cont">
+          <img
+            id="cover-image"
+            class="song-back__img"
+            src="img/songback.png"
+            alt="song back"
+          />
+          <div class="song-data">
+            <span class="name">Song Name</span>
+            <span class="artist">Artist</span>
+          </div>
+        </div>
+        <div>
+          <span class="time" id="currentTime">0:00</span>
+          <input type="range" id="progressBar" min="0" max="100" value="0" />
+          <span class="time" id="durationTime">0:00</span>
+        </div>
+        <div class="controlls">
+          <button class="control-btn" onclick="previous()">
+            <img
+              style="transform: rotate(180deg); border-radius: 50%"
+              src="img/prev.png"
+              alt="prev"
+            />
+          </button>
+          <button id="play" class="control-btn" onclick="play()">
+            <img src="img/play.png" alt="play" />
+          </button>
+          <button class="control-btn" onclick="next()">
+            <img src="img/next.png" alt="next" />
+          </button>
+        </div>
+        <div>
+          <div class="volume"><img src="img/volume.png" alt="volume" /></div>
+          <input type="range" id="volumeControl" min="0" max="1" step="0.01" />
+        </div>
+      </div>
     </div>
 
-    <button onclick="selectFiles()">Add Songs</button>
-    <button onclick="play()">Play</button>
-    <button onclick="next()">Next</button>
-    <button onclick="previous()">Previous</button>
+    <div class="menu">
+      <div id="playlist-btn" class="icon-open">
+        <img src="img/playlist.png" alt="playlist" />
+      </div>
 
-    <div>
-        <span id="currentTime">0:00</span>
-        <input type="range" id="progressBar" min="0" max="100" value="0">
-        <span id="durationTime">0:00</span>
-    </div>
-    <div>
-        <label for="volumeControl">Volume:</label>
-        <input type="range" id="volumeControl" min="0" max="1" step="0.01">
-    </div>
-
-    <div>
-        <label for="searchInput">Search Songs:</label>
-        <input type="text" id="searchInput" placeholder="Search by title or artist">
-    </div>
-    <div>
-        <label for="sortSelect">Sort By:</label>
-        <select id="sortSelect">
+      <div id="playlist-wrap">
+        <div class="playlist-cont">
+          <div id="playlistsDiv" class="playlists-container scrollbar">
+            Select Playlist
+          </div>
+          <div
+            id="playlistsDropdown"
+            class="playlists-dropdown scrollbar"
+            style="display: none"
+          ></div>
+          <button id="renamePlaylistButton"><img src="img/rename.png" alt="rename"></button>
+          <button id="deletePlaylist"><img src="img/del.png" alt="delete"></button>
+          <button id="createPlaylist"><img src="img/add-song.png" alt="add playlist"></button>
+        </div>
+        <div id="space"></div>
+        <div id="createPlaylistCont">
+          <input
+            type="text"
+            id="playlistName"
+            placeholder="Enter playlist name"
+          />
+          <button id="createPlaylistButton">Create Playlist</button>
+        </div>
+        <div id="rename-playlist">
+          <input id="renamePlaylistInput" type="text">
+          <button id="confirmRenameButton" onclick="renameCurrentPlaylist()">Rename</button>
+        </div>
+        <div id="delete-playlist">
+          <button class="del-buttons" id="deletePlaylistButton">Delete Playlist</button>
+          <button class="del-buttons" id="notDelete">Cancel</button>
+        </div>
+        <div class="playlist-cont">
+          <button id="addSong" onclick="selectFiles()"><img src="img/add-song.png" alt="add"></button>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by title or artist"
+          />
+          <select id="sortSelect">
             <option value="date">Date Added</option>
             <option value="title">Title</option>
             <option value="artist">Artist</option>
-        </select>
+          </select>
+        </div>
+        <ul class="scrollbar" id="playlist"></ul>
+      </div>
+
+      <div id="ytdownload" class="icon-open">
+        <img src="img/YT.png" alt="download" />
+      </div>
+
+      <div id="download-wrap">
+        <label class="download-title" for="youtubeInput">Download music from YouTube</label>
+        <div class="download-url-cont">
+          <input
+            type="text"
+            id="youtubeInput"
+            placeholder="Enter YouTube URL"
+          />
+          <button id="downloadButton">Download</button>
+        </div>
+      </div>
     </div>
 
-    <h2>Songs in Playlist</h2>
-    <ul id="playlist"></ul>
-
-    <div id="renamePlaylistModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span id="closeRenameModal" class="close">&times;</span>
-            <h2>Rename Playlist</h2>
-            <input type="text" id="renamePlaylistInput" />
-            <button id="confirmRenameButton">Rename</button>
-            <button id="cancelRenameButton">Cancel</button>
-        </div>
+    <div id="loadingModal" class="loading-modal" style="display: none;">
+      <div class="loading-modal-content">
+        <p>Downloading music from YouTube... Please wait.</p>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="renderer.js"></script>
-</body>
+    <script src="visual.js"></script>
+
+    
+  </body>
 </html>
