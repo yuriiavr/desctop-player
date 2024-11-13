@@ -46,3 +46,5 @@ pids
 # Temporary files
 temp/
 .tmp/
+
+todo.txt

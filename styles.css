@@ -350,6 +350,14 @@ body{
       padding: 10px 15px;
       cursor: pointer;
   }
+
+  .playlist-btn:hover, .playlist-btn:focus{ 
+    padding: 20px 30px;
+  }
+
+  .playlist-btn:hover img, .playlist-btn:focus img{ 
+    width: 30px;
+  }
   
   .playlist button{
     cursor: pointer;

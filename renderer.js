@@ -500,3 +500,21 @@ window.electronAPI.onShowLoadingModal(() => {
 window.electronAPI.onHideLoadingModal(() => {
     document.getElementById('loadingModal').style.display = 'none';
 });
+
+function startDownload(youtubeUrl) {
+  ipcRenderer.send("start-download", youtubeUrl);
+}
+
+window.electronAPI.onUpdateProgress((event, data) => {
+  const progressBar = document.getElementById("progressDownloadBar");
+  const progressText = document.getElementById("progressText"); 
+
+  console.log("Received progress update:", data); // Логування для перевірки
+
+  if (data.progress) {
+    progressBar.value = data.progress;
+  }
+  if (data.stage) {
+    progressText.textContent = `Stage: ${data.stage}`;
+  }
+});

@@ -19,7 +19,8 @@
     "clipboardy": "^4.0.0",
     "puppeteer": "^23.7.1",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-adblocker": "^2.13.6"
+    "puppeteer-extra-plugin-adblocker": "^2.13.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "build": {
     "appId": "com.meAnd.myPlayer",
