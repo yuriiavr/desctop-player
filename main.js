@@ -10,8 +10,7 @@ let mainWindow;
 
 app.on('ready', () => {
     mainWindow = new BrowserWindow({
-        width: 1900,
-        height: 1000,
+        fullscreen: true,
         icon: path.join(__dirname, 'img', 'icon.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
@@ -21,7 +20,6 @@ app.on('ready', () => {
         }
     });
     mainWindow.loadFile('index.html');
-    mainWindow.webContents.openDevTools();
 });
 
 ipcMain.handle('load-playlists', async () => {
