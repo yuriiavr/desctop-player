@@ -1,4 +1,3 @@
-// renderer.js
 let audio = new Audio();
 let savedVolume = localStorage.getItem("savedVolume") || 1.0;
 audio.volume = savedVolume;
@@ -6,10 +5,10 @@ const volumeControl = document.getElementById("volumeControl");
 if (volumeControl) {
   volumeControl.value = savedVolume;
 }
-let playlists = {}; // Об’єкт для зберігання кількох плейлистів
+let playlists = {}; 
 let currentPlaylistName = "All";
 let currentIndex = 0;
-let savedSortBy = localStorage.getItem("savedSortBy") || "title"; // Завантаження збереженого значення сортування // Змінна для зберігання вибору сортування
+let savedSortBy = localStorage.getItem("savedSortBy") || "title";
 
 let sortable;
 
@@ -93,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadAllPlaylists(); // Завантаження всіх збережених плейлистів при запуску
   displayPlaylistsDropdown();
 
-  // Додаємо обробник для клікабельних пісень у плейлисті
+  // Обробник для клікабельних пісень у плейлисті
   const playlistElement = document.getElementById("playlist");
   if (playlistElement) {
     playlistElement.addEventListener("click", (event) => {
@@ -111,7 +110,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     playlistElement.addEventListener("contextmenu", (event) => {
         event.preventDefault();    
         if (event.target.tagName === "LI") {
-            // Remove existing context menu if any
             if (contextMenu) {
                 contextMenu.remove();
             }
@@ -126,7 +124,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             document.body.appendChild(contextMenu);
 
     
-            // Add click event to Rename button
             document
                 .getElementById("renameTrackButton")
                 .addEventListener("click", () => {
@@ -137,7 +134,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         const currentTitle = playlists[currentPlaylistName][trackIndex].title;
                         const currentText = `${currentArtist} - ${currentTitle}`;
     
-                        // Create an input element to rename track
                         const input = document.createElement("input");
                         input.type = "text";
                         input.value = currentText;
@@ -146,7 +142,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         liElement.appendChild(input);
                         input.focus();
     
-                        // Create an error message element
                         const errorMessage = document.createElement("div");
                         errorMessage.style.color = "red";
                         errorMessage.style.fontSize = "14px";
@@ -155,7 +150,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                         errorMessage.textContent = "Please use the format 'Artist - Title' to rename the track.";
                         liElement.appendChild(errorMessage);
     
-                        // Function to confirm changes
                         const confirmChanges = () => {
                             const newText = input.value.trim();
                             if (newText) {
@@ -164,29 +158,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                                     const artist = parts[0].trim();
                                     const title = parts[1].trim();
     
-                                    // Save data if the format is correct
                                     playlists[currentPlaylistName][trackIndex].artist = artist;
                                     playlists[currentPlaylistName][trackIndex].title = title;
                                     saveAllPlaylists();
-                                    displayPlaylist(); // Update the playlist after editing
-                                    errorMessage.style.display = "none"; // Hide error message
+                                    displayPlaylist();
+                                    errorMessage.style.display = "none";
                                 } else {
-                                    // Show error message if format is incorrect
                                     errorMessage.style.display = "block";
-                                    input.focus(); // Keep focus to allow user to correct
+                                    input.focus();
                                 }
                             } else {
-                                input.value = currentText; // Revert back to the previous value
-                                input.focus(); // Refocus to allow correction
+                                input.value = currentText;
+                                input.focus(); 
                             }
                         };
     
-                        // Add blur event to handle changes
                         input.addEventListener("blur", () => {
                             confirmChanges();
                         });
     
-                        // Add keydown event for Enter key
                         input.addEventListener("keydown", (e) => {
                             if (e.key === "Enter") {
                                 confirmChanges();
@@ -200,7 +190,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
   }
 
-  // Enable sorting via drag-and-drop using SortableJS
   if (playlistElement) {
     sortable = new Sortable(playlistElement, {
       animation: 150,
@@ -229,7 +218,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   audio.addEventListener("timeupdate", updateProgressBar);
 
-  // Close context menu on click elsewhere
   document.addEventListener("click", (event) => {
     if (contextMenu && !contextMenu.contains(event.target)) {
       contextMenu.remove();
