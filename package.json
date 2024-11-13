@@ -2,16 +2,48 @@
   "main": "main.js",
   "devDependencies": {
     "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
     "nodemon": "^3.1.7"
   },
   "scripts": {
     "start": "electron .",
-    "dev": "nodemon --exec electron . --watch ."
+    "dev": "nodemon --exec electron . --watch .",
+    "dist": "electron-builder"
   },
   "dependencies": {
     "clipboardy": "^4.0.0",
     "puppeteer": "^23.7.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-adblocker": "^2.13.6"
+  },
+  "build": {
+    "appId": "com.meAnd.myPlayer",
+    "productName": "myPlayer",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
+      "!**/test"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "img/app-icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "img/app-icon.icns"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "icon": "img/app-icon.png"
+    }
   }
 }

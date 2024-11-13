@@ -12,6 +12,7 @@ app.on('ready', () => {
     mainWindow = new BrowserWindow({
         width: 1900,
         height: 1000,
+        icon: path.join(__dirname, 'img', 'icon.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
