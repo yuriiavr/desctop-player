@@ -1,5 +1,10 @@
 {
+  "name": "my-player",
+  "version": "1.0.0",
+  "description": "A desktop music player with YouTube downloader.",
   "main": "main.js",
+  "author": "Yurii",
+  "license": "MIT",
   "devDependencies": {
     "electron": "^33.2.0",
     "electron-builder": "^25.1.8",
@@ -32,18 +37,18 @@
         "nsis",
         "portable"
       ],
-      "icon": "img/app-icon.ico"
+      "icon": "img/icon.ico"
     },
     "mac": {
       "target": "dmg",
-      "icon": "img/app-icon.icns"
+      "icon": "img/icon.icns"
     },
     "linux": {
       "target": [
         "AppImage",
         "deb"
       ],
-      "icon": "img/app-icon.png"
+      "icon": "img/icon.png"
     }
   }
 }
