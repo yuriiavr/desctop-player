@@ -11,6 +11,39 @@ puppeteer.use(StealthPlugin());
 
 let mainWindow;
 
+const settingsPath = path.join(app.getPath("userData"), "settings.json");
+let customChromePath = loadCustomChromePath();
+
+function loadCustomChromePath() {
+  if (fs.existsSync(settingsPath)) {
+    const settings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+    return settings.customChromePath || null;
+  }
+  return null;
+}
+
+function saveCustomChromePath(path) {
+  const settings = fs.existsSync(settingsPath)
+    ? JSON.parse(fs.readFileSync(settingsPath, "utf8"))
+    : {};
+  settings.customChromePath = path;
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+}
+
+ipcMain.handle("choose-chrome-path", async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    properties: ["openFile"],
+    filters: [{ name: "Chrome Executable", extensions: ["exe"] }],
+  });
+
+  if (result.filePaths && result.filePaths[0]) {
+    customChromePath = result.filePaths[0];
+    saveCustomChromePath(customChromePath);
+    return customChromePath;
+  }
+  return null;
+});
+
 app.on("ready", () => {
   mainWindow = new BrowserWindow({
     fullscreen: true,
@@ -48,16 +81,18 @@ ipcMain.handle("select-audio-files", async () => {
   return result.filePaths;
 });
 
+ipcMain.handle('check-file-exists', (event, filePath) => {
+  return fs.existsSync(filePath);
+});
+
 ipcMain.on("start-download", async (event, youtubeUrl) => {
     mainWindow.webContents.send("show-loading-modal");
   
     (async () => {
       try {
         mainWindow.webContents.send("update-progress", { stage: "Initializing", progress: 5 });
-        console.log("Received YouTube URL:", youtubeUrl);
         clipboard.writeText(youtubeUrl);
   
-        console.log("Launching Puppeteer browser...");
         const browser = await puppeteer.launch({
           headless: true,
           slowMo: 5,
@@ -72,6 +107,7 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
             "--window-size=1920,1080",
           ],
           defaultViewport: null,
+          executablePath: customChromePath || undefined,
         });
   
         mainWindow.webContents.send("update-progress", { stage: "Launching Browser", progress: 20 });
@@ -94,12 +130,10 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
   
         const downloadPath = path.join(os.homedir(), "Downloads");
         mainWindow.webContents.send("update-progress", { stage: "Setting Download Path", progress: 30 });
-        console.log("Download path set to:", downloadPath);
   
         browser.on("targetcreated", async (target) => {
           if (target.type() === "page") {
             const newPage = await target.page();
-            console.log("New tab detected, closing it...");
             await newPage.close();
           }
         });
@@ -115,9 +149,9 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
           if (closeButton) {
             await closeButton.click();
           }
-        }
+        } 
   
-        mainWindow.webContents.send("update-progress", { stage: "Filling in Search Field", progress: 50 });
+        mainWindow.webContents.send("update-progress", { stage: "Searching...", progress: 50 });
         await page.waitForSelector('input[type="search"]');
         await page.focus('input[type="search"]');
         await page.type('input[type="search"]', youtubeUrl);
@@ -129,11 +163,11 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
         await page.click("#downloadSection button");
         await new Promise((resolve) => setTimeout(resolve, 1000));
   
-        mainWindow.webContents.send("update-progress", { stage: "Clicking Download", progress: 70 });
+        mainWindow.webContents.send("update-progress", { stage: "Download is starting", progress: 70 });
         await page.waitForSelector("a[download]", { timeout: 60000 });
         await page.click("a[download]");
   
-        mainWindow.webContents.send("update-progress", { stage: "Checking Download", progress: 80 });
+        mainWindow.webContents.send("update-progress", { stage: "Checking Download", progress: 90 });
         const checkFileDownloaded = () => {
           return new Promise((resolve) => {
             const interval = setInterval(() => {
@@ -147,12 +181,11 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
   
         await checkFileDownloaded(downloadPath);
         mainWindow.webContents.send("update-progress", { stage: "Download Complete", progress: 100 });
-        console.log("File downloaded successfully.");
-
+        
         dialog.showMessageBoxSync({
           message: "You may close this window once the MP3 file is in the Downloads folder.",
         });
-  
+
         await browser.close();
       } catch (error) {
         console.error("Error during download:", error);
@@ -166,4 +199,7 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
       }
     })();
   });
-  
+
+  ipcMain.on("exit-app", () => {
+    app.quit();
+  });

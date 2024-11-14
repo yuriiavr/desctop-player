@@ -6,15 +6,6 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body style="background-image: url('img/back.jpg'); background-size: cover">
-    <div id="renameTrackModal" class="modal" style="display: none">
-      <div class="modal-content">
-        <span id="closeRenameTrackModal" class="close">&times;</span>
-        <h2>Rename Track</h2>
-        <input type="text" id="renameTrackInput" />
-        <button id="confirmRenameTrackButton">Rename</button>
-        <button id="cancelRenameTrackButton">Cancel</button>
-      </div>
-    </div>
     <div class="wrap">
       <div class="player">
         <div class="song-back-cont">
@@ -42,7 +33,7 @@
               alt="prev"
             />
           </button>
-          <button id="play" class="control-btn" onclick="play()">
+          <button id="play" class="control-btn">
             <img src="img/play.png" alt="play" />
           </button>
           <button class="control-btn" onclick="next()">
@@ -57,8 +48,16 @@
     </div>
 
     <div class="menu">
-      <div id="playlist-btn" class="icon-open">
-        <img src="img/playlist.png" alt="playlist" />
+      <div class="main-functions">
+        <div id="playlist-btn" class="icon-open">
+          <img src="img/playlist.png" alt="playlist" />
+        </div>
+        <div id="ytdownload" class="icon-open">
+          <img src="img/YT.png" alt="download" />
+        </div>
+        <div id="settings" class="icon-open">
+          <img src="img/settings.png" alt="settings">
+        </div>
       </div>
 
       <div id="playlist-wrap">
@@ -108,10 +107,6 @@
         <ul class="scrollbar" id="playlist"></ul>
       </div>
 
-      <div id="ytdownload" class="icon-open">
-        <img src="img/YT.png" alt="download" />
-      </div>
-
       <div id="download-wrap">
         <label class="download-title" for="youtubeInput">Download music from YouTube</label>
         <div class="download-url-cont">
@@ -122,6 +117,17 @@
           />
           <button id="downloadButton">Download</button>
         </div>
+      </div>
+  
+      <div id="settings-wrap">
+        <div class="path-wrap">
+          <span class="path-title">Path to Chrome</span>
+          <button id="chooseChromeButton">Choose</button>
+        </div>
+      </div>
+
+      <div id="off-btn" class="icon-open">
+        <img src="img/off.png" alt="off">
       </div>
     </div>
 

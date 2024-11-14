@@ -11,15 +11,90 @@ let currentIndex = 0;
 let savedSortBy = localStorage.getItem("savedSortBy") || "title";
 
 let sortable;
+let isPlaying = false;
+
+// Function to check if the path exists in "All" playlist to avoid duplicates
+function pathExistsInAll(path) {
+  return playlists["All"].some((song) => song.path === path);
+}
 
 document.getElementById("downloadButton").addEventListener("click", () => {
   const youtubeUrl = document.getElementById("youtubeInput").value.trim();
-  if (youtubeUrl) {
-    window.electronAPI.startDownload(youtubeUrl);
-  } else {
+
+  // Перевірка наявності URL
+  if (!youtubeUrl) {
     alert("Please enter a valid YouTube URL.");
+  } 
+  // Перевірка, чи URL починається з "https://www.youtube.com/watch?v="
+  else if (!youtubeUrl.startsWith("https://www.youtube.com/watch?v=")) {
+    alert("The URL is invalid");
+  } 
+  else {
+    window.electronAPI.startDownload(youtubeUrl);
   }
 });
+
+
+const playStopButton = document.getElementById("play");
+playStopButton.addEventListener("click", togglePlayPause);
+
+function togglePlayPause() {
+  if (audio.paused && audio.src) {
+    audio.play()
+      .then(() => {
+        isPlaying = true;
+        playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
+      })
+      .catch((error) => console.error("Error during audio playback:", error));
+  } else {
+    audio.pause();
+    isPlaying = false;
+    playStopButton.innerHTML = '<img src="img/play.png" alt="play" />';
+  }
+}
+
+function playNewTrack(filePath) {
+  if (!audio.paused) {
+    audio.pause();
+  }
+  window.electronAPI.checkFileExists(filePath).then(exists => {
+    if (!exists) {
+      console.warn(`File not found: ${filePath}, removing from playlists`);
+      removeTrackFromPlaylistsByPath(filePath);
+      saveAllPlaylists();
+      displayPlaylist(); 
+      return;
+    }
+    audio.src = `file://${filePath}`;
+    audio.play()
+      .then(() => {
+        isPlaying = true;
+        playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
+      })
+      .catch((error) => console.error("Error during audio playback:", error));
+  });
+  audio.src = `file://${filePath}`;
+  audio.play()
+    .then(() => {
+      isPlaying = true;
+      playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
+    })
+    .catch((error) => console.error("Error during audio playback:", error));
+}
+
+function removeTrackFromPlaylistsByPath(path) {
+  for (const playlistName in playlists) {
+    playlists[playlistName] = playlists[playlistName].filter((song) => song.path !== path);
+  }
+}
+
+document.getElementById("playlist").addEventListener("click", (event) => {
+  if (event.target.tagName === "LI") {
+    const filePath = event.target.getAttribute("data-path");
+    playNewTrack(filePath);
+  }
+});
+
 
 document.addEventListener("DOMContentLoaded", async () => {
   const playlistsDiv = document.getElementById("playlistsDiv");
@@ -120,10 +195,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             contextMenu.style.position = `fixed`;
             contextMenu.style.top = `${event.clientY}px`;
             contextMenu.style.left = `${event.clientX}px`;
-            contextMenu.innerHTML = '<button id="renameTrackButton">Rename</button>';
+            contextMenu.innerHTML = '<button class="rc-menu-btn" id="renameTrackButton">Rename</button><button class="rc-menu-btn" id="deleteTrack">Delete</button>';
             document.body.appendChild(contextMenu);
+            
 
-    
             document
                 .getElementById("renameTrackButton")
                 .addEventListener("click", () => {
@@ -182,6 +257,20 @@ document.addEventListener("DOMContentLoaded", async () => {
                                 confirmChanges();
                             }
                         });
+                    }
+                    contextMenu.remove();
+                });
+
+            document
+                .getElementById("deleteTrack")
+                .addEventListener("click", () => {
+                    const trackIndex = Array.from(playlistElement.children).indexOf(event.target);
+                    if (playlists[currentPlaylistName] && playlists[currentPlaylistName][trackIndex]) {
+                        const trackPath = playlists[currentPlaylistName][trackIndex].path;
+                        playlists[currentPlaylistName].splice(trackIndex, 1);
+                        saveAllPlaylists();
+                        displayPlaylist();
+                        removeTrackFromPlaylistsByPath(trackPath);
                     }
                     contextMenu.remove();
                 });
@@ -307,7 +396,7 @@ function displayPlaylist() {
         (song, index) =>
           `<li id="song-name" class="song-name" ${
             index === currentIndex ? 'style="font-weight: bold;"' : ""
-          } data-index="${index}">${index + 1}. ${song.artist} - ${song.title}</li>`
+          } data-index="${index}" data-path="${song.path}">${index + 1}. ${song.artist} - ${song.title}</li>`
       )
       .join("");
   
@@ -334,28 +423,7 @@ function displayPlaylist() {
 function saveCurrentPlaylist() {
   playlists[currentPlaylistName] = playlists[currentPlaylistName] || [];
   saveAllPlaylists();
-}
-
-function play() {
-  const songs = playlists[currentPlaylistName] || [];
-  const playButton = document.getElementById("play");
-  if (songs.length > 0) {
-    if (audio.paused || audio.src !== `file://${songs[currentIndex].path}`) {
-      audio.src = `file://${songs[currentIndex].path}`;
-      audio.play();
-      playButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
-      audio.onended = () => next();
-    } else {
-      audio.pause();
-      playButton.innerHTML = '<img src="img/play.png" alt="play" />';
-    }
-    displayPlaylist();
-  } else {
-    console.error(
-      "Playlist is empty. Please add songs to the playlist before playing."
-    );
-  }
-}
+} 
 
 function playSongAtIndex(index) {
   currentIndex = index;
@@ -402,8 +470,13 @@ async function selectFiles() {
       artist: artist,
       addedAt: new Date().toISOString(),
     };
-    songs.push(song);
+
     if (currentPlaylistName !== "All") {
+      playlists[currentPlaylistName].push(song);
+      if (!pathExistsInAll(filePath)) {
+        playlists["All"].push(song);
+      }
+    } else if (!pathExistsInAll(filePath)) {
       playlists["All"].push(song);
     }
   }
@@ -439,24 +512,46 @@ function parseFileName(fileName) {
 
 function updateProgressBar() {
   const progressBar = document.getElementById("progressBar");
-  if (!progressBar) return;
-  progressBar.value = (audio.currentTime / audio.duration) * 100;
   const currentTimeElement = document.getElementById("currentTime");
   const durationTimeElement = document.getElementById("durationTime");
+
+  // Оновлюємо значення прогрес-бару
+  if (progressBar) {
+    progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
+  }
+
+  // Відображаємо поточний час
   if (currentTimeElement) {
     currentTimeElement.textContent = formatTime(audio.currentTime);
   }
+
+  // Відображаємо загальну тривалість треку або "0:00", якщо значення NaN
   if (durationTimeElement) {
-    durationTimeElement.textContent = formatTime(audio.duration);
+    durationTimeElement.textContent = isNaN(audio.duration) ? "0:00" : formatTime(audio.duration);
   }
 }
+
+// Функція для форматування часу у хвилини:секунди
+function formatTime(seconds) {
+  if (isNaN(seconds)) return "0:00"; // Якщо значення NaN, повертаємо 0:00
+  const minutes = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+}
+
+// Додаємо обробник події для оновлення прогрес-бару, коли аудіо грає
+audio.addEventListener("timeupdate", updateProgressBar);
+
+// Викликаємо updateProgressBar також при зміні треку, щоб відразу відобразити час
+audio.addEventListener("loadedmetadata", updateProgressBar);
 
 function updateAllPlaylist() {
   playlists["All"] = Object.keys(playlists)
     .filter((name) => name !== "All")
     .reduce((allSongs, playlistName) => {
       return allSongs.concat(playlists[playlistName]);
-    }, []);
+    }, [])
+    .filter((song, index, self) => self.findIndex(s => s.path === song.path) === index); // Remove duplicates based on path
 }
 
 function formatTime(seconds) {
@@ -510,11 +605,24 @@ window.electronAPI.onUpdateProgress((event, data) => {
   const progressText = document.getElementById("progressText"); 
 
   console.log("Received progress update:", data); // Логування для перевірки
-
+ 
   if (data.progress) {
     progressBar.value = data.progress;
   }
   if (data.stage) {
-    progressText.textContent = `Stage: ${data.stage}`;
+    progressText.textContent = `${data.stage}`;
   }
+});
+
+document.getElementById("chooseChromeButton").addEventListener("click", async () => {
+  const chromePath = await window.electronAPI.chooseChromePath();
+  if (chromePath) {
+    alert(`Path to Chrome: ${chromePath}`);
+  } else {
+    alert("You use the default path");
+  }
+});  
+
+document.getElementById("off-btn").addEventListener("click", () => { 
+  window.electronAPI.exitApp();
 });

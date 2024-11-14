@@ -1,24 +1,32 @@
 const openListBtn = document.getElementById('playlist-btn');
 const openDownloadBtn = document.getElementById('ytdownload');
+const openSettingsBtn = document.getElementById('settings');
+
 const openListWrap = document.getElementById('playlist-wrap');
 const openDownloadWrap = document.getElementById('download-wrap');
+const openSettingsWrap = document.getElementById('settings-wrap'); 
 
-function toggleExclusive(openElement, closeElement) {
+function toggleExclusive(openElement, ...closeElements) {
     if (openElement.style.display === 'flex') {
         openElement.style.display = 'none';
     } else {
-        closeElement.style.display = 'none';
+        closeElements.forEach(el => el.style.display = 'none');
         openElement.style.display = 'flex';
     }
 }
 
 openListBtn.addEventListener('click', function() {
-    toggleExclusive(openListWrap, openDownloadWrap);
+    toggleExclusive(openListWrap, openDownloadWrap, openSettingsWrap);
 });
 
 openDownloadBtn.addEventListener('click', function() {
-    toggleExclusive(openDownloadWrap, openListWrap);
+    toggleExclusive(openDownloadWrap, openListWrap, openSettingsWrap);
 });
+
+openSettingsBtn.addEventListener('click', function() {
+    toggleExclusive(openSettingsWrap, openListWrap, openDownloadWrap);
+});
+
 
 
 const space = document.getElementById('space');

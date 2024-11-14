@@ -10,5 +10,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     hideLoadingModal: () => ipcRenderer.send('hide-loading-modal'),
     onShowLoadingModal: (callback) => ipcRenderer.on('show-loading-modal', callback),
     onHideLoadingModal: (callback) => ipcRenderer.on('hide-loading-modal', callback),
-    onUpdateProgress: (callback) => ipcRenderer.on('update-progress', callback)
+    onUpdateProgress: (callback) => ipcRenderer.on('update-progress', callback),
+    chooseChromePath: () => ipcRenderer.invoke("choose-chrome-path"),
+    exitApp: () => ipcRenderer.send("exit-app"),
+    checkFileExists: (filePath) => ipcRenderer.invoke('check-file-exists', filePath)
 });
