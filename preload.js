@@ -13,5 +13,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onUpdateProgress: (callback) => ipcRenderer.on('update-progress', callback),
     chooseChromePath: () => ipcRenderer.invoke("choose-chrome-path"),
     exitApp: () => ipcRenderer.send("exit-app"),
-    checkFileExists: (filePath) => ipcRenderer.invoke('check-file-exists', filePath)
-});
+    checkFileExists: (filePath) => ipcRenderer.invoke('check-file-exists', filePath),
+    loadBackgrounds: () => ipcRenderer.invoke("load-backgrounds"),
+    saveSelectedBackground: (selectedBackground) => ipcRenderer.invoke("save-selected-background", selectedBackground),
+    selectBackgroundImages: () => ipcRenderer.invoke("select-background-images"),
+    deleteBackground: (backgroundPath) => ipcRenderer.invoke("delete-background", backgroundPath)
+});  

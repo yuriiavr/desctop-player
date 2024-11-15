@@ -5,9 +5,18 @@
     <title>Music Player</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body style="background-image: url('img/back.jpg'); background-size: cover">
+  <body style="background-size: cover">
     <div class="wrap">
       <div class="player">
+        <div
+          class="player-top"
+          style="
+            padding: 0px;
+            width: 100%;
+            cursor: grab;
+          "
+        >
+        </div>
         <div class="song-back-cont">
           <img
             id="cover-image"
@@ -56,7 +65,7 @@
           <img src="img/YT.png" alt="download" />
         </div>
         <div id="settings" class="icon-open">
-          <img src="img/settings.png" alt="settings">
+          <img src="img/settings.png" alt="settings" />
         </div>
       </div>
 
@@ -70,9 +79,15 @@
             class="playlists-dropdown scrollbar"
             style="display: none"
           ></div>
-          <button id="renamePlaylistButton"><img src="img/rename.png" alt="rename"></button>
-          <button id="deletePlaylist"><img src="img/del.png" alt="delete"></button>
-          <button id="createPlaylist"><img src="img/add-song.png" alt="add playlist"></button>
+          <button id="renamePlaylistButton">
+            <img src="img/rename.png" alt="rename" />
+          </button>
+          <button id="deletePlaylist">
+            <img src="img/del.png" alt="delete" />
+          </button>
+          <button id="createPlaylist">
+            <img src="img/add-song.png" alt="add playlist" />
+          </button>
         </div>
         <div id="space"></div>
         <div id="createPlaylistCont">
@@ -84,15 +99,21 @@
           <button id="createPlaylistButton">Create Playlist</button>
         </div>
         <div id="rename-playlist">
-          <input id="renamePlaylistInput" type="text">
-          <button id="confirmRenameButton" onclick="renameCurrentPlaylist()">Rename</button>
+          <input id="renamePlaylistInput" type="text" />
+          <button id="confirmRenameButton" onclick="renameCurrentPlaylist()">
+            Rename
+          </button>
         </div>
         <div id="delete-playlist">
-          <button class="del-buttons" id="deletePlaylistButton">Delete Playlist</button>
+          <button class="del-buttons" id="deletePlaylistButton">
+            Delete Playlist
+          </button>
           <button class="del-buttons" id="notDelete">Cancel</button>
         </div>
         <div class="playlist-cont">
-          <button id="addSong" onclick="selectFiles()"><img src="img/add-song.png" alt="add"></button>
+          <button id="addSong" onclick="selectFiles()">
+            <img src="img/add-song.png" alt="add" />
+          </button>
           <input
             type="text"
             id="searchInput"
@@ -108,7 +129,9 @@
       </div>
 
       <div id="download-wrap">
-        <label class="download-title" for="youtubeInput">Download music from YouTube</label>
+        <label class="download-title" for="youtubeInput"
+          >Download music from YouTube</label
+        >
         <div class="download-url-cont">
           <input
             type="text"
@@ -118,20 +141,90 @@
           <button id="downloadButton">Download</button>
         </div>
       </div>
-  
+
       <div id="settings-wrap">
         <div class="path-wrap">
           <span class="path-title">Path to Chrome</span>
           <button id="chooseChromeButton">Choose</button>
         </div>
+        <div class="background-wrap">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              width: 100%;
+              margin-bottom: 10px;
+            "
+          >
+            <span class="background-title">Choose your background</span>
+            <button id="addBack" onclick="selectBackgroundImages()">
+              <img src="img/add-song.png" alt="add background" />
+            </button>
+          </div>
+          <div id="backgrounds"></div>
+        </div>
+        <div style="width: 100%; border-top: 1px solid #fff; padding-top: 20px">
+          <div class="controls">
+            <div class="control-group">
+              <label class="clock-title" for="display-toggle">Clock</label>
+              <label class="switch">
+                <input type="checkbox" id="display-toggle" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="control-group">
+              <label class="clock-settings" for="font-family">Type</label>
+              <select class="font-type" id="font-family">
+                <option value="Digital">Digital</option>
+                <option value="Digital Round">Digital Round</option>
+              </select>
+            </div>
+            <div class="control-group">
+              <label class="clock-settings" for="font-size">Size</label>
+              <input
+                type="number"
+                id="font-size"
+                min="10"
+                max="150"
+                value="60"
+              />
+            </div>
+            <div class="control-group">
+              <label class="clock-settings" for="gradient-start"
+                >Gradient Start Color:</label
+              >
+              <input type="color" id="gradient-start" value="#ff0099" />
+            </div>
+            <div class="control-group">
+              <label class="clock-settings" for="gradient-end"
+                >Gradient End Color:</label
+              >
+              <input type="color" id="gradient-end" value="#61d32c" />
+            </div>
+          </div>
+        </div>
+        <div class="other-styles">
+          <div class="other-settings">
+            <span class="setting-title">Volume Bar</span>
+            <input type="color" id="olumeBar" value="#43e5f7" />
+          </div>
+          <div class="other-settings">
+            <span class="setting-title">Album image</span>
+            <label class="switch">
+              <input type="checkbox" id="image-display-switch">
+              <span class="slider"></span>
+          </label>
+          </div>
+        </div>
       </div>
 
       <div id="off-btn" class="icon-open">
-        <img src="img/off.png" alt="off">
+        <img src="img/off.png" alt="off" />
       </div>
     </div>
 
-    <div id="loadingModal" class="loading-modal" style="display: none;">
+    <div id="loadingModal" class="loading-modal" style="display: none">
       <div class="loading-modal-content">
         <p>Downloading music from YouTube... Please wait.</p>
         <progress id="progressDownloadBar" max="100" value="0"></progress>
@@ -139,10 +232,13 @@
       </div>
     </div>
 
+    <div class="clock" id="clock">
+      <span>0</span><span>0</span><span>:</span><span>0</span><span>0</span
+      ><span>:</span><span>0</span><span>0</span>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="renderer.js"></script>
     <script src="visual.js"></script>
-
-    
   </body>
 </html>

@@ -18,8 +18,8 @@ function loadCustomChromePath() {
   if (fs.existsSync(settingsPath)) {
     const settings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
     return settings.customChromePath || null;
-  }
-  return null;
+  } 
+  return null; 
 }
 
 function saveCustomChromePath(path) {
@@ -27,6 +27,19 @@ function saveCustomChromePath(path) {
     ? JSON.parse(fs.readFileSync(settingsPath, "utf8"))
     : {};
   settings.customChromePath = path;
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+}
+
+function loadSettings() {
+  if (fs.existsSync(settingsPath)) {
+      const settings = JSON.parse(fs.readFileSync(settingsPath));
+      settings.backgrounds = Array.isArray(settings.backgrounds) ? settings.backgrounds : [];
+      return settings;
+  }
+  return { backgrounds: [], selectedBackground: "" };
+}
+
+function saveSettings(settings) {
   fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
 }
 
@@ -203,3 +216,56 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
   ipcMain.on("exit-app", () => {
     app.quit();
   });
+
+  ipcMain.handle("select-background-images", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+        properties: ["openFile", "multiSelections"],
+        filters: [{ name: "Images", extensions: ["jpg", "jpeg", "png"] }]
+    });
+    if (!canceled && filePaths.length > 0) {
+        let settings = loadSettings();
+        if (!Array.isArray(settings.backgrounds)) {
+            settings.backgrounds = [];
+        }
+        settings.backgrounds.push(...filePaths);
+        saveSettings(settings);
+        return settings;
+    }
+    return null;
+});
+
+ipcMain.handle("load-backgrounds", () => {
+    const settings = loadSettings();
+    return settings;
+});
+
+ipcMain.handle("save-selected-background", (event, selectedBackground) => {
+    const settings = loadSettings();
+    settings.selectedBackground = selectedBackground;
+    saveSettings(settings);
+    return settings;
+});
+
+ipcMain.handle("delete-background", (event, backgroundPath) => {
+  let settings = loadSettings();
+  const normalizedPath = backgroundPath.replace(/\\/g, '/');
+  settings.backgrounds = settings.backgrounds.filter(bg => bg.replace(/\\/g, '/') !== normalizedPath);
+  if (settings.selectedBackground.replace(/\\/g, '/') === normalizedPath) {
+      settings.selectedBackground = "";
+  }
+  saveSettings(settings);
+return settings;
+});
+
+app.on("ready", () => {
+    mainWindow = new BrowserWindow({
+        fullscreen: true,
+        webPreferences: {
+            preload: path.join(__dirname, "preload.js"),
+            contextIsolation: true,
+            nodeIntegration: true
+        },
+        autoHideMenuBar: true,
+    });
+    mainWindow.loadFile("index.html");
+});
