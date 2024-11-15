@@ -8,7 +8,7 @@ myPlayer — це десктопний музичний плеєр з можли
 - **Керування плейлистами:** Створюйте, перейменовуйте та видаляйте плейлисти для зручної організації ваших музичних файлів.
 
 ## Інсталяція та Запуск
-1. **Завантаження:** Скачайте останню версію програми [myPlayer.zip]([https://github.com/yuriiavr/desctop-player/releases/tag/myPlayer](https://github.com/yuriiavr/desctop-player/releases/tag/MyPlayerv1.1.0)).
+1. **Завантаження:** Скачайте останню версію програми [myPlayer.zip](https://github.com/yuriiavr/desctop-player/releases/tag/myPlayer](https://github.com/yuriiavr/desctop-player/releases/tag/MyPlayerv1.1.0)).
 2. **Розпакування:** Розпакуйте архів на вашому комп'ютері.
 3. **Запуск:** Запустіть файл `myPlayer.exe`, щоб користуватися програмою.
 
