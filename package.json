@@ -26,23 +26,22 @@
     "appId": "com.dev.melomaniac",
     "productName": "Melomaniac",
     "nsis": {
-      "include": "installer.nsh",
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "uninstallDisplayName": "Melomaniac"
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "uninstallDisplayName": "Melomaniac",
+    "shortcutName": "Melomaniac",
+    "include": "./installer.nsh"
     },
     "directories": {
       "buildResources": "assets"
     },
     "files": [
-      "**/*",
       "!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/test",
       ".cache/**",
-      "dist/**/*",
-      "main.js"
+      "**/*"
     ],
     "win": {
       "target": [

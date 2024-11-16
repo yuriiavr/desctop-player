@@ -14,7 +14,6 @@ let sortable;
 let isPlaying = false;
 let contextMenu;
 
-// Function to check if the path exists in "All" playlist to avoid duplicates
 function pathExistsInAll(path) {
   return playlists["All"].some((song) => song.path === path);
 }
@@ -22,11 +21,10 @@ function pathExistsInAll(path) {
 document.getElementById("downloadButton").addEventListener("click", () => {
   const youtubeUrl = document.getElementById("youtubeInput").value.trim();
 
-  // Check if URL is provided
   if (!youtubeUrl) {
     alert("Please enter a valid YouTube URL.");
   }
-  // Check if URL starts with "https://www.youtube.com/watch?v="
+
   else if (!youtubeUrl.startsWith("https://www.youtube.com/watch?v=")) {
     alert("The URL is invalid");
   } else {
@@ -159,7 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     deletePlaylistButton.addEventListener("click", deleteCurrentPlaylist);
   }
 
-  await loadAllPlaylists(); // Load all saved playlists on startup
+  await loadAllPlaylists();
   displayPlaylistsDropdown();
 
   const playlistElement = document.getElementById("playlist");
@@ -520,17 +518,14 @@ function updateProgressBar() {
   const currentTimeElement = document.getElementById("currentTime");
   const durationTimeElement = document.getElementById("durationTime");
 
-  // Update progress bar value
   if (progressBar) {
     progressBar.value = (audio.currentTime / audio.duration) * 100 || 0;
   }
 
-  // Display current time
   if (currentTimeElement) {
     currentTimeElement.textContent = formatTime(audio.currentTime);
   }
 
-  // Display total duration or "0:00" if value is NaN
   if (durationTimeElement) {
     durationTimeElement.textContent = isNaN(audio.duration)
       ? "0:00"
@@ -538,18 +533,15 @@ function updateProgressBar() {
   }
 }
 
-// Function to format time in minutes:seconds
 function formatTime(seconds) {
-  if (isNaN(seconds)) return "0:00"; // If value is NaN, return 0:00
+  if (isNaN(seconds)) return "0:00";
   const minutes = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
   return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
 }
 
-// Add event listener for updating progress bar when audio is playing
 audio.addEventListener("timeupdate", updateProgressBar);
 
-// Call updateProgressBar also when track changes to display time immediately
 audio.addEventListener("loadedmetadata", updateProgressBar);
 
 function updateAllPlaylist() {
@@ -561,7 +553,7 @@ function updateAllPlaylist() {
     .filter(
       (song, index, self) =>
         self.findIndex((s) => s.path === song.path) === index
-    ); // Remove duplicates based on path
+    );
 }
 
 function sortPlaylist(criteria) {
@@ -608,7 +600,7 @@ window.electronAPI.onUpdateProgress((event, data) => {
   const progressBar = document.getElementById("progressDownloadBar");
   const progressText = document.getElementById("progressText");
 
-  console.log("Received progress update:", data); // Log for checking
+  console.log("Received progress update:", data);
 
   if (data.progress) {
     progressBar.value = data.progress;

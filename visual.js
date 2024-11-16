@@ -83,7 +83,6 @@ notDeleteButton.addEventListener("click", () => {
   saveDisplayState();
 });
 
-// Save display state to localStorage
 function saveDisplayState() {
   const displayState = {
     playlistWrap: openListWrap.style.display,
@@ -97,7 +96,6 @@ function saveDisplayState() {
   localStorage.setItem("displayState", JSON.stringify(displayState));
 }
 
-// Load display state from localStorage
 function loadDisplayState() {
   const displayState = JSON.parse(localStorage.getItem("displayState"));
   if (displayState) {
@@ -110,8 +108,6 @@ function loadDisplayState() {
     space.style.display = displayState.space;
   }
 }
-
-//clock
 
 function updateClock() {
   const now = new Date();
@@ -130,7 +126,6 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// Clock customization controls
 const fontSizeInput = document.getElementById("font-size");
 const gradientStartInput = document.getElementById("gradient-start");
 const gradientEndInput = document.getElementById("gradient-end");
@@ -162,7 +157,6 @@ function updateClockBackground() {
   });
 }
 
-// Save clock settings to localStorage
 function saveClockSettings() {
   const clockSettings = {
     fontSize: fontSizeInput.value,
@@ -172,7 +166,6 @@ function saveClockSettings() {
   localStorage.setItem("clockSettings", JSON.stringify(clockSettings));
 }
 
-// Load clock settings from localStorage
 function loadClockSettings() {
   const clockSettings = JSON.parse(localStorage.getItem("clockSettings"));
   if (clockSettings) {
@@ -221,7 +214,6 @@ loadClockSettings();
 
 const wrap = document.querySelector('.wrap');
 
-// Load saved position from localStorage
 const savedPosition = JSON.parse(localStorage.getItem('wrapPosition'));
 if (savedPosition) {
     wrap.style.left = savedPosition.left;
@@ -233,7 +225,7 @@ let isDragging = false;
 let offset = { x: 0, y: 0 };
 
 grabCont.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return; // Перетягування лише лівою кнопкою миші
+    if (e.button !== 0) return;
     const playerTop = e.target.closest('.player-top');
     if (playerTop) {
         isDragging = true;
@@ -267,7 +259,6 @@ document.addEventListener('mouseup', () => {
     if (isDragging) {
         grabCont.style.cursor = 'grab';
         isDragging = false;
-        // Save the current position to localStorage
         localStorage.setItem('wrapPosition', JSON.stringify({
             left: wrap.style.left,
             top: wrap.style.top,
@@ -280,11 +271,9 @@ document.addEventListener('mousemove', (e) => {
         let newX = e.clientX - offset.x;
         let newY = e.clientY - offset.y;
 
-        // Ensure the player stays within the boundaries of the body
         const bodyRect = document.body.getBoundingClientRect();
         const wrapRect = wrap.getBoundingClientRect();
 
-        // Обмеження на позицію для уникнення виходу за межі body
         if (newX < 0) newX = 0;
         if (newY < 0) newY = 0;
         if (newX + wrapRect.width > bodyRect.width) newX = bodyRect.width - wrapRect.width;
@@ -296,10 +285,9 @@ document.addEventListener('mousemove', (e) => {
 });
 
 
-// Load saved position from localStorage
 const savedClockPosition = JSON.parse(localStorage.getItem('clockPosition'));
 if (savedClockPosition) {
-    clock.style.position = 'absolute'; // Set position to absolute for manual movement
+    clock.style.position = 'absolute';
     clock.style.left = savedClockPosition.left;
     clock.style.top = savedClockPosition.top;
 }
@@ -308,7 +296,7 @@ let isClockDragging = false;
 let clockOffset = { x: 0, y: 0 };
 
 clock.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return; // Only allow dragging with left mouse button
+    if (e.button !== 0) return;
     if (e.target.closest('.clock')) {
         isClockDragging = true;
         const rect = clock.getBoundingClientRect();
@@ -325,7 +313,6 @@ document.addEventListener('mouseup', () => {
     if (isClockDragging) {
         clock.style.cursor = 'grab';
         isClockDragging = false;
-        // Save the current position to localStorage
         localStorage.setItem('clockPosition', JSON.stringify({
             left: clock.style.left,
             top: clock.style.top,
@@ -338,7 +325,6 @@ document.addEventListener('mousemove', (e) => {
         let newX = e.clientX - clockOffset.x;
         let newY = e.clientY - clockOffset.y;
 
-        // Ensure the clock stays within the boundaries of the body
         const bodyRect = document.body.getBoundingClientRect();
         const clockRect = clock.getBoundingClientRect();
 
