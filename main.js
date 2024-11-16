@@ -256,16 +256,3 @@ ipcMain.handle("delete-background", (event, backgroundPath) => {
   saveSettings(settings);
 return settings;
 });
-
-app.on("ready", () => {
-    mainWindow = new BrowserWindow({
-        fullscreen: true,
-        webPreferences: {
-            preload: path.join(__dirname, "preload.js"),
-            contextIsolation: true,
-            nodeIntegration: true
-        },
-        autoHideMenuBar: true,
-    });
-    mainWindow.loadFile("index.html");
-});

@@ -23,10 +23,20 @@
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "build": {
-    "appId": "com.meAnd.myPlayer",
-    "productName": "myPlayer",
+    "appId": "com.dev.melomaniac",
+    "productName": "Melomaniac",
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "uninstallDisplayName": "Melomaniac",
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "include": "installer.nsh"
+    },
     "directories": {
-      "output": "dist"
+      "buildResources": "assets"
     },
     "files": [
       "**/*",
