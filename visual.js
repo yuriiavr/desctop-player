@@ -28,6 +28,17 @@ openSettingsBtn.addEventListener("click", function () {
   toggleExclusive(openSettingsWrap, openListWrap, openDownloadWrap);
 });
 
+document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      openListWrap.style.display = "none";
+      openDownloadWrap.style.display = "none";
+      openSettingsWrap.style.display = "none";
+  
+      saveDisplayState();
+    }
+  });
+  
+
 const space = document.getElementById("space");
 const createPlaylistCont = document.getElementById("createPlaylistCont");
 const renamePlaylistCont = document.getElementById("rename-playlist");
@@ -385,16 +396,34 @@ function updateVolumeBarColor(color) {
 const imageSwitch = document.getElementById('image-display-switch');
 const coverImage = document.getElementById('cover-image');
 const player = document.querySelector('.player');
+const controlsImgs = document.querySelectorAll('.controlls img');
+const volumeImg = document.querySelector('.volume img');
+const playImg = document.querySelector('#play img');
 
 const savedImageDisplay = localStorage.getItem('coverImageDisplay');
 if (savedImageDisplay) {
     coverImage.style.display = savedImageDisplay;
-    imageSwitch.checked = savedImageDisplay === 'block';
-    player.style.padding = savedImageDisplay === 'block' ? '90px 0' : '30px 0';
+    imageSwitch.checked = savedImageDisplay === 'none';
+    player.style.padding = savedImageDisplay === 'none' ? '30px 0' : '90px 0';
+    player.style.width = savedImageDisplay === 'none' ? '500px' : '600px';
+    wrap.style.width = savedImageDisplay === 'none' ? '500px' : '600px';
+
+    const imageSize = savedImageDisplay === 'none' ? '40px' : '50px';
+    playImg.style.width = imageSize;
+    controlsImgs.forEach(img => img.style.width = imageSize);
+    volumeImg.style.display = savedImageDisplay === 'none' ? 'block' : 'none';
 }
 
 imageSwitch.addEventListener('change', () => {
-    coverImage.style.display = imageSwitch.checked ? 'block' : 'none';
+    coverImage.style.display = imageSwitch.checked ? 'none' : 'block';
     localStorage.setItem('coverImageDisplay', coverImage.style.display);
-    player.style.padding = imageSwitch.checked ? '90px 0' : '30px 0';
+    
+    player.style.padding = imageSwitch.checked ? '30px 0' : '90px 0';
+    player.style.width = imageSwitch.checked ? '500px' : '600px';
+    wrap.style.width = imageSwitch.checked ? '500px' : '600px';
+
+    const imageSize = imageSwitch.checked ? '40px' : '50px';
+    playImg.style.width = imageSize;
+    controlsImgs.forEach(img => img.style.width = imageSize);
+    volumeImg.style.display = imageSwitch.checked ? 'block' : 'none';
 });

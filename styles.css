@@ -74,6 +74,7 @@ body {
   justify-content: space-evenly;
   align-items: center;
   margin-bottom: 10px;
+  padding: 10px 0;
 }
 
 .control-btn {
