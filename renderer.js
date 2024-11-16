@@ -662,7 +662,7 @@ async function loadBackgrounds() {
         label.style.display = "inline-block";
         label.style.margin = "5px";
         label.style.cursor = "pointer";
-        label.innerHTML = `<img src="file://${background.replace(/\\/g, "/")}" alt="Фон ${index + 1}" class="background-preview" style="width: 100px; height: 100px; object-fit: cover;" />`;
+        label.innerHTML = `<img src="file://${background.replace(/\\/g, "/")}" alt="Background ${index + 1}" class="background-preview" style="width: 100px; height: 100px; object-fit: cover;" />`;
         label.appendChild(radioInput);
         backgroundsDiv.appendChild(label);
       });
