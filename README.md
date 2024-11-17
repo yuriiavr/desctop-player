@@ -1,43 +1,45 @@
-# myPlayer
+# Melomaniac
 
-myPlayer — це десктопний музичний плеєр з можливістю завантаження музики з YouTube. Цей додаток надає користувачеві зручний інтерфейс для керування плейлистами, відтворення музики та завантаження треків прямо з YouTube.
+Melomaniac is a desktop music player with the ability to download music from YouTube. This application provides users with an intuitive interface for managing playlists, playing music, and downloading tracks directly from YouTube.
 
-## Функціонал
-- **Відтворення музики:** Плеєр підтримує відтворення музичних файлів, доданих до плейлистів.
-- **Завантаження з YouTube:** Завантажуйте музику з YouTube, вставляючи посилання на відео.
-- **Керування плейлистами:** Створюйте, перейменовуйте та видаляйте плейлисти для зручної організації ваших музичних файлів.
+📄 **[Read this in Ukrainian / Читати українською](READMEua.md)**
 
-## Інсталяція та Запуск
-1. **Завантаження:** Скачайте останню версію програми [myPlayer.zip](https://github.com/yuriiavr/desctop-player/releases/tag/myPlayer](https://github.com/yuriiavr/desctop-player/releases/tag/MyPlayerv1.1.0)](https://github.com/yuriiavr/desctop-player/releases/download/MyPlayerv1.1.0/My.Player.zip)).
-2. **Розпакування:** Розпакуйте архів на вашому комп'ютері.
-3. **Запуск:** Запустіть файл `myPlayer.exe`, щоб користуватися програмою.
+## Features
+- **Music Playback:** The player supports the playback of music files added to playlists.
+- **YouTube Downloads:** Download music from YouTube by inserting the video link.
+- **Playlist Management:** Create, rename, and delete playlists to organize your music files conveniently.
+- **Customization:** Extensive customization options allow users to adjust the appearance and functionality of the player to their preferences.
 
-## Вимоги до системи
-- **Операційна система:** Windows 7 або новіша.
-- **Node.js:** Для запуску в режимі розробника потрібен встановлений Node.js.
+## Installation and Launch
+1. **Download:** Download the latest version of the application [Melomaniac.rar](https://github.com/yuriiavr/desctop-player/releases/download/Melomaniac/Melomaniac.1.2.0.rar).
+2. **Installation:** Extract "Melomaniac.rar" and install the application by opening "Melomaniac Setup 1.2.0.exe".
+3. **Launch:** Navigate to the folder where you installed the player and open Melomaniac.exe, or use the desktop shortcut.
 
-## Команди для розробників
-- **Запуск у режимі розробника:**
-  ```
+## How to Download Music from YouTube
+- **Set Chrome Path:** In the player's interface, open the settings. Specify the path to Chrome, e.g., `C:/Program Files/Google/Chrome/Application/chrome.exe`.
+- **Download:** In the player's interface, go to the YouTube tab. Paste the desired link and click Download. The song will appear in the "Downloads" folder on your PC. Note that the player is optimized for downloading songs! It is recommended not to download hour-long playlists or videos.
+
+## System Requirements
+- **Operating System:** Windows 7 or later.
+- **Node.js:** Required for running in development mode.
+
+## Developer Commands
+- **Run in Development Mode:**
+  ```bash
   npm run dev
-  ```
-- **Збірка дистрибутиву:**
-  ```
-  npm run dist
-  ```
 
-## Використані Технології
-- **Electron**: Для створення кросплатформенного десктопного додатку.
-- **Puppeteer**: Для автоматизації завантаження музики з YouTube.
-- **Electron Builder**: Для пакування та підготовки дистрибутиву додатку.
+## Technologies Used
+- **Electron**: For building a cross-platform desktop application.
+- **Puppeteer**: For automating music downloads from YouTube.
+- **Electron Builder**: For packaging and preparing the application distribution.
 
-## Поширені проблеми
-- **Іконка не встановлюється:** Переконайтеся, що файл `icon.ico` має правильний формат і декілька розмірів зображення (16x16, 32x32, 48x48, 256x256).
-- **Проблеми з правами доступу:** Спробуйте запускати команду створення дистрибутиву з правами адміністратора.
+## Common Issues
+- **Icon Does Not Appear:** Ensure the `icon.ico` file is in the correct format and includes multiple image sizes (16x16, 32x32, 48x48, 256x256).
+- **Access Rights Issues:** Try running the build command with administrative rights.
+- **YouTube Download Fails:** Refer to the download instructions above!
 
-## Ліцензія
-Цей проект ліцензований під [MIT License](LICENSE).
+## License
+This project is licensed under the [MIT License](LICENSE).
 
 ## Зворотній зв'язок
-Якщо у вас є пропозиції або питання, будь ласка, відкрийте issue на [GitHub](https://github.com/username/myPlayer/issues).
-
+If you have suggestions or questions, please open an issue on [GitHub](https://github.com/username/myPlayer/issues).
