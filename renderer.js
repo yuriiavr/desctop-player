@@ -51,28 +51,6 @@ function togglePlayPause() {
   }
 }
 
-function playNewTrack(filePath) {
-  if (!audio.paused) {
-    audio.pause();
-  }
-  window.electronAPI.checkFileExists(filePath).then((exists) => {
-    if (!exists) {
-      console.warn(`File not found: ${filePath}, removing from playlists`);
-      removeTrackFromPlaylistsByPath(filePath);
-      saveAllPlaylists();
-      displayPlaylist();
-      return;
-    }
-    audio.src = `file://${filePath}`;
-    audio
-      .play()
-      .then(() => {
-        isPlaying = true;
-        playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
-      })
-      .catch((error) => console.error("Error during audio playback:", error));
-  });
-}
 
 function removeTrackFromPlaylistsByPath(path) {
   for (const playlistName in playlists) {
@@ -192,75 +170,66 @@ document.addEventListener("DOMContentLoaded", async () => {
           '<button class="rc-menu-btn" id="renameTrackButton">Rename</button><button class="rc-menu-btn" id="deleteTrack">Delete</button>';
         document.body.appendChild(contextMenu);
 
-        document
-          .getElementById("renameTrackButton")
-          .addEventListener("click", () => {
-            const trackIndex = Array.from(playlistElement.children).indexOf(
-              event.target
-            );
-            if (
-              playlists[currentPlaylistName] &&
-              playlists[currentPlaylistName][trackIndex]
-            ) {
-              const liElement = event.target;
-              const currentArtist =
-                playlists[currentPlaylistName][trackIndex].artist;
-              const currentTitle =
-                playlists[currentPlaylistName][trackIndex].title;
-              const currentText = `${currentArtist} - ${currentTitle}`;
-
-              const input = document.createElement("input");
-              input.type = "text";
-              input.value = currentText;
-              input.classList.add("renameInp");
-              liElement.innerHTML = "";
-              liElement.appendChild(input);
-              input.focus();
-
-              const errorMessage = document.createElement("div");
-              errorMessage.style.color = "red";
-              errorMessage.style.fontSize = "14px";
-              errorMessage.style.display = "none";
-              errorMessage.style.marginTop = "5px";
-              errorMessage.textContent =
-                "Please use the format 'Artist - Title' to rename the track.";
-              liElement.appendChild(errorMessage);
-
-              const confirmChanges = () => {
-                const newText = input.value.trim();
-                if (newText) {
-                  const parts = newText.split(" - ");
-                  if (parts.length === 2) {
-                    const artist = parts[0].trim();
-                    const title = parts[1].trim();
-
-                    playlists[currentPlaylistName][trackIndex].artist = artist;
-                    playlists[currentPlaylistName][trackIndex].title = title;
-                    saveAllPlaylists();
-                    displayPlaylist();
-                    errorMessage.style.display = "none";
-                  } else {
-                    errorMessage.style.display = "block";
-                    input.focus();
-                  }
+        document.getElementById("renameTrackButton").addEventListener("click", () => {
+          const trackIndex = Array.from(playlistElement.children).indexOf(event.target);
+          if (playlists[currentPlaylistName] && playlists[currentPlaylistName][trackIndex]) {
+            const liElement = event.target;
+            const currentArtist = playlists[currentPlaylistName][trackIndex].artist;
+            const currentTitle = playlists[currentPlaylistName][trackIndex].title;
+            const currentText = `${currentArtist} - ${currentTitle}`;
+  
+            const input = document.createElement("input");
+            input.type = "text";
+            input.value = currentText;
+            input.classList.add("renameInp");
+            liElement.innerHTML = "";
+            liElement.appendChild(input);
+            input.focus();
+  
+            const errorMessage = document.createElement("div");
+            errorMessage.style.color = "red";
+            errorMessage.style.fontSize = "14px";
+            errorMessage.style.display = "none";
+            errorMessage.style.marginTop = "5px";
+            errorMessage.textContent = "Please use the format 'Artist - Title' to rename the track.";
+            liElement.appendChild(errorMessage);
+  
+            const confirmChanges = () => {
+              const newText = input.value.trim();
+              if (newText) {
+                const parts = newText.split(" - ");
+                if (parts.length === 2) {
+                  const artist = parts[0].trim();
+                  const title = parts[1].trim();
+  
+                  playlists[currentPlaylistName][trackIndex].artist = artist;
+                  playlists[currentPlaylistName][trackIndex].title = title;
+  
+                  saveAllPlaylists();
+                  displayPlaylist();
+                  errorMessage.style.display = "none";
                 } else {
-                  input.value = currentText;
+                  errorMessage.style.display = "block";
                   input.focus();
                 }
-              };
-
-              input.addEventListener("blur", () => {
+              } else {
+                input.value = currentText;
+                input.focus();
+              }
+            };
+  
+            input.addEventListener("blur", () => {
+              confirmChanges();
+            });
+  
+            input.addEventListener("keydown", (e) => {
+              if (e.key === "Enter") {
                 confirmChanges();
-              });
-
-              input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                  confirmChanges();
-                }
-              });
-            }
-            contextMenu.remove();
-          });
+              }
+            });
+          }
+          contextMenu.remove();
+        });
 
         document.getElementById("deleteTrack").addEventListener("click", () => {
           const trackIndex = Array.from(playlistElement.children).indexOf(
@@ -384,25 +353,26 @@ function displayPlaylistsDropdown() {
 function displayPlaylist() {
   const playlistElement = document.getElementById("playlist");
   if (!playlistElement) return;
+
   const searchTerm = document.getElementById("searchInput")
     ? document.getElementById("searchInput").value.toLowerCase()
     : "";
+
   const songs = playlists[currentPlaylistName] || [];
-  const filteredSongs = songs.filter(
-    (song) =>
-      song.title.toLowerCase().includes(searchTerm) ||
-      song.artist.toLowerCase().includes(searchTerm)
-  );
+  const filteredSongs = songs.filter((song) => {
+    const title = song.title ? song.title.toLowerCase() : "";
+    const artist = song.artist ? song.artist.toLowerCase() : "";
+    return title.includes(searchTerm) || artist.includes(searchTerm);
+  });
 
   playlistElement.innerHTML = filteredSongs
-    .map(
-      (song, index) =>
-        `<li id="song-name" class="song-name" ${
-          index === currentIndex ? 'style="font-weight: bold;"' : ""
-        } data-index="${index}" data-path="${song.path}">${index + 1}. ${
-          song.artist
-        } - ${song.title}</li>`
-    )
+    .map((song, index) => {
+      const title = song.title || "Unknown Title";
+      const artist = song.artist || "Unknown Artist";
+      return `<li id="song-name" class="song-name" ${
+        index === currentIndex ? 'style="font-weight: bold;"' : ""
+      } data-index="${index}" data-path="${song.path}">${index + 1}. ${artist} - ${title}</li>`;
+    })
     .join("");
 
   const songElements = document.querySelectorAll("#song-name");
@@ -413,15 +383,9 @@ function displayPlaylist() {
       songElement.textContent = fullText.substring(0, 40) + "...";
     }
   });
-  if (filteredSongs.length > 0) {
-    const songDataName = document.querySelector(".song-data .name");
-    const songDataArtist = document.querySelector(".song-data .artist");
-    if (songDataName && songDataArtist) {
-      songDataName.textContent = filteredSongs[currentIndex].title;
-      songDataArtist.textContent = filteredSongs[currentIndex].artist;
-    }
-  }
 }
+
+
 
 function saveCurrentPlaylist() {
   playlists[currentPlaylistName] = playlists[currentPlaylistName] || [];
@@ -465,12 +429,23 @@ async function selectFiles() {
   const songs = playlists[currentPlaylistName] || [];
 
   for (const filePath of filePaths) {
-    const fileName = getFileName(filePath);
-    const { artist, title } = parseFileName(fileName);
+    const metadata = await window.electronAPI.getMetadata(filePath);
+    const title = metadata && metadata.title ? metadata.title : "Unknown Title";
+    const artist = metadata && metadata.artist ? metadata.artist : "Unknown Artist";
+    let image = null;
+
+    if (metadata && metadata.image && metadata.image.imageBuffer) {
+      image = {
+        data: metadata.image.imageBuffer,
+        mime: metadata.image.mime,
+      };
+    }
+
     const song = {
       path: filePath,
       title: title,
       artist: artist,
+      image: image,
       addedAt: new Date().toISOString(),
     };
 
@@ -489,6 +464,131 @@ async function selectFiles() {
   displayPlaylist();
   saveAllPlaylists();
 }
+
+
+async function playNewTrack(filePath) {
+  if (!audio.paused) {
+    audio.pause(); // Поставити на паузу поточний трек
+  }
+
+  // Очікування завершення паузи, щоб уникнути конфлікту
+  await new Promise((resolve) => {
+    if (audio.paused) {
+      resolve();
+    } else {
+      audio.onpause = () => {
+        resolve();
+        audio.onpause = null; // Прибрати слухача, щоб він не заважав у майбутньому
+      };
+    }
+  });
+
+  // Отримати інформацію про пісню з плейлиста
+  const song = playlists[currentPlaylistName].find((s) => s.path === filePath);
+  const songTitle = song ? song.title : "Unknown Title";
+  const artist = song ? song.artist : "Unknown Artist";
+
+  // Отримати обкладинку з метаданих
+  let coverImageURL = "img/songback.png"; // Стандартна картинка
+  if (song && song.image && song.image.data) {
+    try {
+      // Створити буфер з даних
+      const buffer = new Uint8Array(song.image.data).buffer;
+      const blob = new Blob([buffer], { type: song.image.mime });
+      coverImageURL = URL.createObjectURL(blob);
+      console.log("Generated cover image URL:", coverImageURL); // Лог для перевірки
+    } catch (error) {
+      console.error("Failed to create cover image from metadata:", error);
+    }
+  }
+
+  // Встановити джерело аудіо
+  audio.src = `file://${filePath}`;
+
+  // Оновлення інтерфейсу - назва пісні, виконавець, обкладинка
+  const songNameElement = document.querySelector(".song-data .name");
+  const artistElement = document.querySelector(".song-data .artist");
+  const coverImageElement = document.getElementById("cover-image");
+
+  if (songNameElement) songNameElement.textContent = songTitle;
+  if (artistElement) artistElement.textContent = artist;
+  if (coverImageElement) coverImageElement.src = coverImageURL;
+
+  // Дочекайтеся, поки аудіо буде завантажене, перед відтворенням
+  audio.addEventListener(
+    'canplay',
+    async () => {
+      try {
+        await audio.play();
+        isPlaying = true;
+        playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
+      } catch (error) {
+        console.error("Error during audio playback:", error);
+      }
+    },
+    { once: true }
+  );
+}
+
+
+function displayPlaylist() {
+  const playlistElement = document.getElementById("playlist");
+  if (!playlistElement) return;
+
+  const searchTerm = document.getElementById("searchInput")
+    ? document.getElementById("searchInput").value.toLowerCase()
+    : "";
+
+  const songs = playlists[currentPlaylistName] || [];
+  const filteredSongs = songs.filter((song) => {
+    const title = song.title ? song.title.toLowerCase() : "";
+    const artist = song.artist ? song.artist.toLowerCase() : "";
+    return title.includes(searchTerm) || artist.includes(searchTerm);
+  });
+
+  playlistElement.innerHTML = filteredSongs
+    .map((song, index) => {
+      const title = song.title || "Unknown Title";
+      const artist = song.artist || "Unknown Artist";
+      return `<li id="song-name" class="song-name" ${
+        index === currentIndex ? 'style="font-weight: bold;"' : ""
+      } data-index="${index}" data-path="${song.path}">${index + 1}. ${artist} - ${title}</li>`;
+    })
+    .join("");
+
+  const songElements = document.querySelectorAll("#song-name");
+
+  songElements.forEach((songElement) => {
+    let fullText = songElement.textContent.trim();
+    if (fullText.length > 40) {
+      songElement.textContent = fullText.substring(0, 40) + "...";
+    }
+  });
+
+  // Оновити назву, виконавця і обкладинку для активної пісні
+  if (filteredSongs.length > 0) {
+    const songDataName = document.querySelector(".song-data .name");
+    const songDataArtist = document.querySelector(".song-data .artist");
+    const coverImageElement = document.getElementById("cover-image");
+    const currentSong = filteredSongs[currentIndex];
+
+    if (songDataName) songDataName.textContent = currentSong.title || "Unknown Title";
+    if (songDataArtist) songDataArtist.textContent = currentSong.artist || "Unknown Artist";
+
+    if (currentSong.image) {
+      const arrayBuffer = new Uint8Array(currentSong.image.data).buffer;
+      const blob = new Blob([arrayBuffer], { type: currentSong.image.mime });
+      const coverImageURL = URL.createObjectURL(blob);
+      if (coverImageElement) coverImageElement.src = coverImageURL;
+    } else {
+      if (coverImageElement) coverImageElement.src = "img/songback.png";
+    }
+  }
+}
+
+
+
+
 
 // Function to get the file name without path
 function getFileName(filePath) {

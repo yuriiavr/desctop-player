@@ -1,6 +1,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const NodeID3 = require('node-id3');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+    getMetadata: (filePath) => {
+        try {
+            const tags = NodeID3.read(filePath);
+            console.log("ID3 Tags retrieved:", tags);
+            return tags;
+        } catch (error) {
+            console.error("Failed to parse ID3 tags:", error);
+            return null;
+        }
+    },
     loadPlaylists: () => ipcRenderer.invoke('load-playlists'),
     savePlaylists: (playlists) => ipcRenderer.invoke('save-playlists', playlists),
     selectAudioFiles: () => ipcRenderer.invoke('select-audio-files'),
@@ -17,5 +28,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     loadBackgrounds: () => ipcRenderer.invoke("load-backgrounds"),
     saveSelectedBackground: (selectedBackground) => ipcRenderer.invoke("save-selected-background", selectedBackground),
     selectBackgroundImages: () => ipcRenderer.invoke("select-background-images"),
-    deleteBackground: (backgroundPath) => ipcRenderer.invoke("delete-background", backgroundPath)
+    deleteBackground: (backgroundPath) => ipcRenderer.invoke("delete-background", backgroundPath),
 });  

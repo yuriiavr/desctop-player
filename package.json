@@ -17,6 +17,8 @@
   },
   "dependencies": {
     "clipboardy": "^4.0.0",
+    "music-metadata": "^10.6.0",
+    "node-id3": "^0.2.6",
     "puppeteer": "^23.7.1",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-adblocker": "^2.13.6",
@@ -27,12 +29,12 @@
     "productName": "Melomaniac",
     "nsis": {
       "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "createDesktopShortcut": true,
-    "createStartMenuShortcut": true,
-    "uninstallDisplayName": "Melomaniac",
-    "shortcutName": "Melomaniac",
-    "include": "./installer.nsh"
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "uninstallDisplayName": "Melomaniac",
+      "shortcutName": "Melomaniac",
+      "include": "./installer.nsh"
     },
     "directories": {
       "buildResources": "assets"

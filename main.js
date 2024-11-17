@@ -5,6 +5,7 @@ const puppeteer = require("puppeteer-extra");
 const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 const os = require("os");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const mm = require('music-metadata');
 
 puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
@@ -256,3 +257,14 @@ ipcMain.handle("delete-background", (event, backgroundPath) => {
   saveSettings(settings);
 return settings;
 });
+
+ipcMain.handle('get-metadata', async (event, filePath) => {
+  try {
+      const metadata = await mm.parseFile(filePath, { duration: true });
+      return metadata;
+  } catch (error) {
+      console.error(`Error getting metadata for file ${filePath}:`, error);
+      return { error: error.message };
+  }
+});
+
