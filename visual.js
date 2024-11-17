@@ -29,15 +29,14 @@ openSettingsBtn.addEventListener("click", function () {
 });
 
 document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-      openListWrap.style.display = "none";
-      openDownloadWrap.style.display = "none";
-      openSettingsWrap.style.display = "none";
-  
-      saveDisplayState();
-    }
-  });
-  
+  if (e.key === "Escape") {
+    openListWrap.style.display = "none";
+    openDownloadWrap.style.display = "none";
+    openSettingsWrap.style.display = "none";
+
+    saveDisplayState();
+  }
+});
 
 const space = document.getElementById("space");
 const createPlaylistCont = document.getElementById("createPlaylistCont");
@@ -212,204 +211,244 @@ fontFamilySelect.addEventListener("change", () => {
 loadDisplayState();
 loadClockSettings();
 
-const wrap = document.querySelector('.wrap');
+const wrap = document.querySelector(".wrap");
 
-const savedPosition = JSON.parse(localStorage.getItem('wrapPosition'));
+const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
 if (savedPosition) {
-    wrap.style.left = savedPosition.left;
-    wrap.style.top = savedPosition.top;
+  wrap.style.left = savedPosition.left;
+  wrap.style.top = savedPosition.top;
 }
 
-const grabCont = document.querySelector('.player-top');
+const grabCont = document.querySelector(".player-top");
 let isDragging = false;
 let offset = { x: 0, y: 0 };
 
-grabCont.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return;
-    const playerTop = e.target.closest('.player-top');
-    if (playerTop) {
-        isDragging = true;
-        const rect = wrap.getBoundingClientRect();
-        offset = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        };
-        grabCont.style.cursor = 'grabbing';
-    }
-    e.preventDefault();
+grabCont.addEventListener("mousedown", (e) => {
+  if (e.button !== 0) return;
+  const playerTop = e.target.closest(".player-top");
+  if (playerTop) {
+    isDragging = true;
+    const rect = wrap.getBoundingClientRect();
+    offset = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+    grabCont.style.cursor = "grabbing";
+  }
+  e.preventDefault();
 });
 
-grabCont.addEventListener('dblclick', () => {
+grabCont.addEventListener("dblclick", () => {
+  const bodyRect = document.body.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
+
+  const centerX = (bodyRect.width - wrapRect.width) / 2;
+  const centerY = (bodyRect.height - wrapRect.height) / 2;
+
+  wrap.style.left = `${centerX}px`;
+  wrap.style.top = `${centerY}px`;
+
+  localStorage.setItem(
+    "wrapPosition",
+    JSON.stringify({
+      left: wrap.style.left,
+      top: wrap.style.top,
+    })
+  );
+});
+
+document.addEventListener("mouseup", () => {
+  if (isDragging) {
+    grabCont.style.cursor = "grab";
+    isDragging = false;
+    localStorage.setItem(
+      "wrapPosition",
+      JSON.stringify({
+        left: wrap.style.left,
+        top: wrap.style.top,
+      })
+    );
+  }
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (isDragging) {
+    let newX = e.clientX - offset.x;
+    let newY = e.clientY - offset.y;
+
     const bodyRect = document.body.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
 
-    const centerX = (bodyRect.width - wrapRect.width) / 2;
-    const centerY = (bodyRect.height - wrapRect.height) / 2;
+    if (newX < 0) newX = 0;
+    if (newY < 0) newY = 0;
+    if (newX + wrapRect.width > bodyRect.width)
+      newX = bodyRect.width - wrapRect.width;
+    if (newY + wrapRect.height > bodyRect.height)
+      newY = bodyRect.height - wrapRect.height;
 
-    wrap.style.left = `${centerX}px`;
-    wrap.style.top = `${centerY}px`;
-
-    localStorage.setItem('wrapPosition', JSON.stringify({
-        left: wrap.style.left,
-        top: wrap.style.top,
-    }));
+    wrap.style.left = `${newX}px`;
+    wrap.style.top = `${newY}px`;
+  }
 });
 
-document.addEventListener('mouseup', () => {
-    if (isDragging) {
-        grabCont.style.cursor = 'grab';
-        isDragging = false;
-        localStorage.setItem('wrapPosition', JSON.stringify({
-            left: wrap.style.left,
-            top: wrap.style.top,
-        }));
-    }
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (isDragging) {
-        let newX = e.clientX - offset.x;
-        let newY = e.clientY - offset.y;
-
-        const bodyRect = document.body.getBoundingClientRect();
-        const wrapRect = wrap.getBoundingClientRect();
-
-        if (newX < 0) newX = 0;
-        if (newY < 0) newY = 0;
-        if (newX + wrapRect.width > bodyRect.width) newX = bodyRect.width - wrapRect.width;
-        if (newY + wrapRect.height > bodyRect.height) newY = bodyRect.height - wrapRect.height;
-
-        wrap.style.left = `${newX}px`;
-        wrap.style.top = `${newY}px`;
-    }
-});
-
-
-const savedClockPosition = JSON.parse(localStorage.getItem('clockPosition'));
+const savedClockPosition = JSON.parse(localStorage.getItem("clockPosition"));
 if (savedClockPosition) {
-    clock.style.position = 'absolute';
-    clock.style.left = savedClockPosition.left;
-    clock.style.top = savedClockPosition.top;
+  clock.style.position = "absolute";
+  clock.style.left = savedClockPosition.left;
+  clock.style.top = savedClockPosition.top;
 }
 
 let isClockDragging = false;
 let clockOffset = { x: 0, y: 0 };
 
-clock.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return;
-    if (e.target.closest('.clock')) {
-        isClockDragging = true;
-        const rect = clock.getBoundingClientRect();
-        clockOffset = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        };
-        clock.style.cursor = 'grabbing';
-    }
-    e.preventDefault();
+clock.addEventListener("mousedown", (e) => {
+  if (e.button !== 0) return;
+  if (e.target.closest(".clock")) {
+    isClockDragging = true;
+    const rect = clock.getBoundingClientRect();
+    clockOffset = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+    clock.style.cursor = "grabbing";
+  }
+  e.preventDefault();
 });
 
-document.addEventListener('mouseup', () => {
-    if (isClockDragging) {
-        clock.style.cursor = 'grab';
-        isClockDragging = false;
-        localStorage.setItem('clockPosition', JSON.stringify({
-            left: clock.style.left,
-            top: clock.style.top,
-        }));
-    }
+document.addEventListener("mouseup", () => {
+  if (isClockDragging) {
+    clock.style.cursor = "grab";
+    isClockDragging = false;
+    localStorage.setItem(
+      "clockPosition",
+      JSON.stringify({
+        left: clock.style.left,
+        top: clock.style.top,
+      })
+    );
+  }
 });
 
-document.addEventListener('mousemove', (e) => {
-    if (isClockDragging) {
-        let newX = e.clientX - clockOffset.x;
-        let newY = e.clientY - clockOffset.y;
+document.addEventListener("mousemove", (e) => {
+  if (isClockDragging) {
+    let newX = e.clientX - clockOffset.x;
+    let newY = e.clientY - clockOffset.y;
 
-        const bodyRect = document.body.getBoundingClientRect();
-        const clockRect = clock.getBoundingClientRect();
+    const bodyRect = document.body.getBoundingClientRect();
+    const clockRect = clock.getBoundingClientRect();
 
-        if (newX < 0) newX = 0;
-        if (newY < 0) newY = 0;
-        if (newX + clockRect.width > bodyRect.width) newX = bodyRect.width - clockRect.width;
-        if (newY + clockRect.height > bodyRect.height) newY = bodyRect.height - clockRect.height;
+    if (newX < 0) newX = 0;
+    if (newY < 0) newY = 0;
+    if (newX + clockRect.width > bodyRect.width)
+      newX = bodyRect.width - clockRect.width;
+    if (newY + clockRect.height > bodyRect.height)
+      newY = bodyRect.height - clockRect.height;
 
-        clock.style.left = `${newX}px`;
-        clock.style.top = `${newY}px`;
-    }
+    clock.style.left = `${newX}px`;
+    clock.style.top = `${newY}px`;
+  }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-    const savedPosition = JSON.parse(localStorage.getItem('wrapPosition'));
-    if (savedPosition) {
-        wrap.style.left = savedPosition.left;
-        wrap.style.top = savedPosition.top;
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
+  if (savedPosition) {
+    wrap.style.left = savedPosition.left;
+    wrap.style.top = savedPosition.top;
+  }
 
-    const savedColor = localStorage.getItem('volumeBarColor');
-    const volumeBarInput = document.getElementById('olumeBar');
-    if (savedColor) {
-        volumeBarInput.value = savedColor;
-        updateVolumeBarColor(savedColor);
-    }
+  const savedColor = localStorage.getItem("volumeBarColor");
+  const volumeBarInput = document.getElementById("olumeBar");
+  if (savedColor) {
+    volumeBarInput.value = savedColor;
+    updateVolumeBarColor(savedColor);
+  }
 
-    volumeBarInput.addEventListener('input', (e) => {
-        const color = e.target.value;
-        updateVolumeBarColor(color);
-        localStorage.setItem('volumeBarColor', color);
-    });
+  volumeBarInput.addEventListener("input", (e) => {
+    const color = e.target.value;
+    updateVolumeBarColor(color);
+    localStorage.setItem("volumeBarColor", color);
+  });
 });
 
 function updateVolumeBarColor(color) {
-    const styleSheet = document.styleSheets[0];
-    let ruleExists = false;
+  const styleSheet = document.styleSheets[0];
+  let ruleExists = false;
 
-    for (let i = 0; i < styleSheet.cssRules.length; i++) {
-        if (styleSheet.cssRules[i].selectorText === 'input[type="range"]::-webkit-slider-thumb') {
-            styleSheet.cssRules[i].style.boxShadow = `calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}`;
-            ruleExists = true;
-            break;
-        } 
+  for (let i = 0; i < styleSheet.cssRules.length; i++) {
+    if (
+      styleSheet.cssRules[i].selectorText ===
+      'input[type="range"]::-webkit-slider-thumb'
+    ) {
+      styleSheet.cssRules[
+        i
+      ].style.boxShadow = `calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}`;
+      ruleExists = true;
+      break;
     }
+  }
 
-    if (!ruleExists) {
-        styleSheet.insertRule(
-            `input[type="range"]::-webkit-slider-thumb { box-shadow: calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}; }`,
-            styleSheet.cssRules.length
-        );
-    }
+  if (!ruleExists) {
+    styleSheet.insertRule(
+      `input[type="range"]::-webkit-slider-thumb { box-shadow: calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}; }`,
+      styleSheet.cssRules.length
+    );
+  }
 }
 
-const imageSwitch = document.getElementById('image-display-switch');
-const coverImage = document.getElementById('cover-image');
-const player = document.querySelector('.player');
-const controlsImgs = document.querySelectorAll('.controlls img');
-const volumeImg = document.querySelector('.volume img');
-const playImg = document.querySelector('#play img');
+const imageSwitch = document.getElementById("image-display-switch");
+const coverImage = document.getElementById("cover-image");
+const player = document.querySelector(".player");
+const controlsImgs = document.querySelectorAll(".controlls img");
+const volumeImg = document.querySelector(".volume img");
+const playImg = document.querySelector("#play img");
 
-const savedImageDisplay = localStorage.getItem('coverImageDisplay');
+const savedImageDisplay = localStorage.getItem("coverImageDisplay");
 if (savedImageDisplay) {
-    coverImage.style.display = savedImageDisplay;
-    imageSwitch.checked = savedImageDisplay === 'none';
-    player.style.padding = savedImageDisplay === 'none' ? '30px 0' : '90px 0';
-    player.style.width = savedImageDisplay === 'none' ? '500px' : '600px';
-    wrap.style.width = savedImageDisplay === 'none' ? '500px' : '600px';
+  coverImage.style.display = savedImageDisplay;
+  imageSwitch.checked = savedImageDisplay === "none";
+  player.style.padding = savedImageDisplay === "none" ? "30px 0" : "90px 0";
+  player.style.width = savedImageDisplay === "none" ? "500px" : "600px";
+  wrap.style.width = savedImageDisplay === "none" ? "500px" : "600px";
 
-    const imageSize = savedImageDisplay === 'none' ? '40px' : '50px';
-    playImg.style.width = imageSize;
-    controlsImgs.forEach(img => img.style.width = imageSize);
-    volumeImg.style.display = savedImageDisplay === 'none' ? 'block' : 'none';
+  const imageSize = savedImageDisplay === "none" ? "40px" : "50px";
+  playImg.style.width = imageSize;
+  controlsImgs.forEach((img) => (img.style.width = imageSize));
+  volumeImg.style.display = savedImageDisplay === "none" ? "block" : "none";
 }
 
-imageSwitch.addEventListener('change', () => {
-    coverImage.style.display = imageSwitch.checked ? 'none' : 'block';
-    localStorage.setItem('coverImageDisplay', coverImage.style.display);
-    
-    player.style.padding = imageSwitch.checked ? '30px 0' : '90px 0';
-    player.style.width = imageSwitch.checked ? '500px' : '600px';
-    wrap.style.width = imageSwitch.checked ? '500px' : '600px';
+imageSwitch.addEventListener("change", () => {
+  coverImage.style.display = imageSwitch.checked ? "none" : "block";
+  localStorage.setItem("coverImageDisplay", coverImage.style.display);
 
-    const imageSize = imageSwitch.checked ? '40px' : '50px';
-    playImg.style.width = imageSize;
-    controlsImgs.forEach(img => img.style.width = imageSize);
-    volumeImg.style.display = imageSwitch.checked ? 'block' : 'none';
+  player.style.padding = imageSwitch.checked ? "30px 0" : "90px 0";
+  player.style.width = imageSwitch.checked ? "500px" : "600px";
+  wrap.style.width = imageSwitch.checked ? "500px" : "600px";
+
+  const imageSize = imageSwitch.checked ? "40px" : "50px";
+  playImg.style.width = imageSize;
+  controlsImgs.forEach((img) => (img.style.width = imageSize));
+  volumeImg.style.display = imageSwitch.checked ? "block" : "none";
+});
+
+//Settings section
+
+const visualBtn = document.getElementById("visualBtn");
+const soundBtn = document.getElementById("soundBtn");
+const visualSettings = document.getElementById("visualSettings");
+const musicSettings = document.getElementById("musicSettings");
+
+visualBtn.addEventListener("click", () => {
+  visualSettings.style.display = "flex";
+  musicSettings.style.display = "none";
+
+  visualBtn.classList.add("setting-btn-active");
+  soundBtn.classList.remove("setting-btn-active");
+});
+
+soundBtn.addEventListener("click", () => {
+  musicSettings.style.display = "flex";
+  visualSettings.style.display = "none";
+
+  soundBtn.classList.add("setting-btn-active");
+  visualBtn.classList.remove("setting-btn-active");
 });

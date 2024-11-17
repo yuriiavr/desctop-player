@@ -23,9 +23,7 @@ document.getElementById("downloadButton").addEventListener("click", () => {
 
   if (!youtubeUrl) {
     alert("Please enter a valid YouTube URL.");
-  }
-
-  else if (!youtubeUrl.startsWith("https://www.youtube.com/watch?v=")) {
+  } else if (!youtubeUrl.startsWith("https://www.youtube.com/watch?v=")) {
     alert("The URL is invalid");
   } else {
     window.electronAPI.startDownload(youtubeUrl);
@@ -50,7 +48,6 @@ function togglePlayPause() {
     playStopButton.innerHTML = '<img src="img/play.png" alt="play" />';
   }
 }
-
 
 function removeTrackFromPlaylistsByPath(path) {
   for (const playlistName in playlists) {
@@ -163,73 +160,83 @@ document.addEventListener("DOMContentLoaded", async () => {
         contextMenu = document.createElement("div");
         contextMenu.className = "context-menu";
         contextMenu.style.position = `fixed`;
-        contextMenu.style.zIndex = '50';
+        contextMenu.style.zIndex = "50";
         contextMenu.style.top = `${event.clientY}px`;
         contextMenu.style.left = `${event.clientX}px`;
         contextMenu.innerHTML =
           '<button class="rc-menu-btn" id="renameTrackButton">Rename</button><button class="rc-menu-btn" id="deleteTrack">Delete</button>';
         document.body.appendChild(contextMenu);
 
-        document.getElementById("renameTrackButton").addEventListener("click", () => {
-          const trackIndex = Array.from(playlistElement.children).indexOf(event.target);
-          if (playlists[currentPlaylistName] && playlists[currentPlaylistName][trackIndex]) {
-            const liElement = event.target;
-            const currentArtist = playlists[currentPlaylistName][trackIndex].artist;
-            const currentTitle = playlists[currentPlaylistName][trackIndex].title;
-            const currentText = `${currentArtist} - ${currentTitle}`;
-  
-            const input = document.createElement("input");
-            input.type = "text";
-            input.value = currentText;
-            input.classList.add("renameInp");
-            liElement.innerHTML = "";
-            liElement.appendChild(input);
-            input.focus();
-  
-            const errorMessage = document.createElement("div");
-            errorMessage.style.color = "red";
-            errorMessage.style.fontSize = "14px";
-            errorMessage.style.display = "none";
-            errorMessage.style.marginTop = "5px";
-            errorMessage.textContent = "Please use the format 'Artist - Title' to rename the track.";
-            liElement.appendChild(errorMessage);
-  
-            const confirmChanges = () => {
-              const newText = input.value.trim();
-              if (newText) {
-                const parts = newText.split(" - ");
-                if (parts.length === 2) {
-                  const artist = parts[0].trim();
-                  const title = parts[1].trim();
-  
-                  playlists[currentPlaylistName][trackIndex].artist = artist;
-                  playlists[currentPlaylistName][trackIndex].title = title;
-  
-                  saveAllPlaylists();
-                  displayPlaylist();
-                  errorMessage.style.display = "none";
+        document
+          .getElementById("renameTrackButton")
+          .addEventListener("click", () => {
+            const trackIndex = Array.from(playlistElement.children).indexOf(
+              event.target
+            );
+            if (
+              playlists[currentPlaylistName] &&
+              playlists[currentPlaylistName][trackIndex]
+            ) {
+              const liElement = event.target;
+              const currentArtist =
+                playlists[currentPlaylistName][trackIndex].artist;
+              const currentTitle =
+                playlists[currentPlaylistName][trackIndex].title;
+              const currentText = `${currentArtist} - ${currentTitle}`;
+
+              const input = document.createElement("input");
+              input.type = "text";
+              input.value = currentText;
+              input.classList.add("renameInp");
+              liElement.innerHTML = "";
+              liElement.appendChild(input);
+              input.focus();
+
+              const errorMessage = document.createElement("div");
+              errorMessage.style.color = "red";
+              errorMessage.style.fontSize = "14px";
+              errorMessage.style.display = "none";
+              errorMessage.style.marginTop = "5px";
+              errorMessage.textContent =
+                "Please use the format 'Artist - Title' to rename the track.";
+              liElement.appendChild(errorMessage);
+
+              const confirmChanges = () => {
+                const newText = input.value.trim();
+                if (newText) {
+                  const parts = newText.split(" - ");
+                  if (parts.length === 2) {
+                    const artist = parts[0].trim();
+                    const title = parts[1].trim();
+
+                    playlists[currentPlaylistName][trackIndex].artist = artist;
+                    playlists[currentPlaylistName][trackIndex].title = title;
+
+                    saveAllPlaylists();
+                    displayPlaylist();
+                    errorMessage.style.display = "none";
+                  } else {
+                    errorMessage.style.display = "block";
+                    input.focus();
+                  }
                 } else {
-                  errorMessage.style.display = "block";
+                  input.value = currentText;
                   input.focus();
                 }
-              } else {
-                input.value = currentText;
-                input.focus();
-              }
-            };
-  
-            input.addEventListener("blur", () => {
-              confirmChanges();
-            });
-  
-            input.addEventListener("keydown", (e) => {
-              if (e.key === "Enter") {
+              };
+
+              input.addEventListener("blur", () => {
                 confirmChanges();
-              }
-            });
-          }
-          contextMenu.remove();
-        });
+              });
+
+              input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                  confirmChanges();
+                }
+              });
+            }
+            contextMenu.remove();
+          });
 
         document.getElementById("deleteTrack").addEventListener("click", () => {
           const trackIndex = Array.from(playlistElement.children).indexOf(
@@ -371,7 +378,9 @@ function displayPlaylist() {
       const artist = song.artist || "Unknown Artist";
       return `<li id="song-name" class="song-name" ${
         index === currentIndex ? 'style="font-weight: bold;"' : ""
-      } data-index="${index}" data-path="${song.path}">${index + 1}. ${artist} - ${title}</li>`;
+      } data-index="${index}" data-path="${song.path}">${
+        index + 1
+      }. ${artist} - ${title}</li>`;
     })
     .join("");
 
@@ -385,8 +394,6 @@ function displayPlaylist() {
   });
 }
 
-
-
 function saveCurrentPlaylist() {
   playlists[currentPlaylistName] = playlists[currentPlaylistName] || [];
   saveAllPlaylists();
@@ -394,12 +401,13 @@ function saveCurrentPlaylist() {
 
 function playSongAtIndex(index) {
   currentIndex = index;
-  audio.src = `file://${playlists[currentPlaylistName][currentIndex].path}`;
+  const filePath = playlists[currentPlaylistName][currentIndex].path;
   audio.play();
   const playButton = document.getElementById("play");
   playButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
   audio.onended = () => next();
   displayPlaylist();
+  playNewTrack(filePath);
 }
 
 function next() {
@@ -411,6 +419,7 @@ function next() {
   playButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
   audio.onended = () => next();
   displayPlaylist();
+  playNewTrack(songs[currentIndex].path);
 }
 
 function previous() {
@@ -420,7 +429,7 @@ function previous() {
   audio.play();
   const playButton = document.getElementById("play");
   playButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
-  audio.onended = () => next();
+  audio.addEventListener('ended', next);
   displayPlaylist();
 }
 
@@ -431,7 +440,8 @@ async function selectFiles() {
   for (const filePath of filePaths) {
     const metadata = await window.electronAPI.getMetadata(filePath);
     const title = metadata && metadata.title ? metadata.title : "Unknown Title";
-    const artist = metadata && metadata.artist ? metadata.artist : "Unknown Artist";
+    const artist =
+      metadata && metadata.artist ? metadata.artist : "Unknown Artist";
     let image = null;
 
     if (metadata && metadata.image && metadata.image.imageBuffer) {
@@ -465,56 +475,78 @@ async function selectFiles() {
   saveAllPlaylists();
 }
 
-
 async function playNewTrack(filePath) {
   if (!audio.paused) {
-    audio.pause(); // Поставити на паузу поточний трек
+    audio.pause();
   }
 
-  // Очікування завершення паузи, щоб уникнути конфлікту
   await new Promise((resolve) => {
     if (audio.paused) {
       resolve();
     } else {
       audio.onpause = () => {
         resolve();
-        audio.onpause = null; // Прибрати слухача, щоб він не заважав у майбутньому
+        audio.onpause = null;
       };
     }
   });
 
-  // Отримати інформацію про пісню з плейлиста
+  const exists = await window.electronAPI.checkFileExists(filePath);
+  if (!exists) {
+    console.warn(`File not found: ${filePath}, removing from playlists`);
+    removeTrackFromPlaylistsByPath(filePath);
+    saveAllPlaylists();
+    displayPlaylist();
+    return;
+  }
+
+  const metadata = await window.electronAPI.getMetadata(filePath);
   const song = playlists[currentPlaylistName].find((s) => s.path === filePath);
   const songTitle = song ? song.title : "Unknown Title";
   const artist = song ? song.artist : "Unknown Artist";
 
-  // Отримати обкладинку з метаданих
-  let coverImageURL = "img/songback.png"; // Стандартна картинка
-  if (song && song.image && song.image.data) {
-    try {
-      // Створити буфер з даних
-      const buffer = new Uint8Array(song.image.data).buffer;
-      const blob = new Blob([buffer], { type: song.image.mime });
-      coverImageURL = URL.createObjectURL(blob);
-      console.log("Generated cover image URL:", coverImageURL); // Лог для перевірки
-    } catch (error) {
-      console.error("Failed to create cover image from metadata:", error);
-    }
+  let coverImageURL = "img/songback.png";
+  if (metadata && metadata.image && metadata.image.data) {
+    const arrayBuffer = new Uint8Array(metadata.image.data).buffer;
+    const blob = new Blob([arrayBuffer], { type: metadata.image.mime });
+    coverImageURL = URL.createObjectURL(blob);
   }
 
-  // Встановити джерело аудіо
-  audio.src = `file://${filePath}`;
+  try {
+    const response = await fetch(`file://${filePath}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const audioURL = URL.createObjectURL(blob);
+      audio.src = audioURL;
+    } else {
+      console.error(`Failed to load audio file from path ${filePath}`);
+      return;
+    }
+  } catch (error) {
+    console.error(`Failed to load audio file from path ${filePath}:`, error);
+    return;
+  }
 
-  // Оновлення інтерфейсу - назва пісні, виконавець, обкладинка
   const songNameElement = document.querySelector(".song-data .name");
   const artistElement = document.querySelector(".song-data .artist");
   const coverImageElement = document.getElementById("cover-image");
 
   if (songNameElement) songNameElement.textContent = songTitle;
   if (artistElement) artistElement.textContent = artist;
-  if (coverImageElement) coverImageElement.src = coverImageURL;
+  if (coverImageElement) {
+    coverImageElement.src = coverImageURL;
 
-  // Дочекайтеся, поки аудіо буде завантажене, перед відтворенням
+    coverImageElement.onload = () => {
+      console.log("Cover image loaded successfully.");
+    };
+    coverImageElement.onerror = () => {
+      console.error("Failed to load cover image from URL:", coverImageURL);
+      coverImageElement.src = "img/songback.png";
+    };
+  } else {
+    console.error("Cover image element not found.");
+  }
+
   audio.addEventListener(
     'canplay',
     async () => {
@@ -531,71 +563,11 @@ async function playNewTrack(filePath) {
 }
 
 
-function displayPlaylist() {
-  const playlistElement = document.getElementById("playlist");
-  if (!playlistElement) return;
 
-  const searchTerm = document.getElementById("searchInput")
-    ? document.getElementById("searchInput").value.toLowerCase()
-    : "";
-
-  const songs = playlists[currentPlaylistName] || [];
-  const filteredSongs = songs.filter((song) => {
-    const title = song.title ? song.title.toLowerCase() : "";
-    const artist = song.artist ? song.artist.toLowerCase() : "";
-    return title.includes(searchTerm) || artist.includes(searchTerm);
-  });
-
-  playlistElement.innerHTML = filteredSongs
-    .map((song, index) => {
-      const title = song.title || "Unknown Title";
-      const artist = song.artist || "Unknown Artist";
-      return `<li id="song-name" class="song-name" ${
-        index === currentIndex ? 'style="font-weight: bold;"' : ""
-      } data-index="${index}" data-path="${song.path}">${index + 1}. ${artist} - ${title}</li>`;
-    })
-    .join("");
-
-  const songElements = document.querySelectorAll("#song-name");
-
-  songElements.forEach((songElement) => {
-    let fullText = songElement.textContent.trim();
-    if (fullText.length > 40) {
-      songElement.textContent = fullText.substring(0, 40) + "...";
-    }
-  });
-
-  // Оновити назву, виконавця і обкладинку для активної пісні
-  if (filteredSongs.length > 0) {
-    const songDataName = document.querySelector(".song-data .name");
-    const songDataArtist = document.querySelector(".song-data .artist");
-    const coverImageElement = document.getElementById("cover-image");
-    const currentSong = filteredSongs[currentIndex];
-
-    if (songDataName) songDataName.textContent = currentSong.title || "Unknown Title";
-    if (songDataArtist) songDataArtist.textContent = currentSong.artist || "Unknown Artist";
-
-    if (currentSong.image) {
-      const arrayBuffer = new Uint8Array(currentSong.image.data).buffer;
-      const blob = new Blob([arrayBuffer], { type: currentSong.image.mime });
-      const coverImageURL = URL.createObjectURL(blob);
-      if (coverImageElement) coverImageElement.src = coverImageURL;
-    } else {
-      if (coverImageElement) coverImageElement.src = "img/songback.png";
-    }
-  }
-}
-
-
-
-
-
-// Function to get the file name without path
 function getFileName(filePath) {
   return filePath.split("/").pop().split("\\").pop();
 }
 
-// Function to parse the file name into artist and title
 function parseFileName(fileName) {
   const nameWithoutExtension = fileName.replace(/\.[^/.]+$/, "");
   const parts = nameWithoutExtension.split(" - ");
@@ -737,7 +709,9 @@ async function loadBackgrounds() {
     settings.backgrounds.forEach((background, index) => {
       window.electronAPI.checkFileExists(background).then((exists) => {
         if (!exists) {
-          console.warn(`Background file not found: ${background}, removing from settings`);
+          console.warn(
+            `Background file not found: ${background}, removing from settings`
+          );
           removeBackgroundFromSettings(background);
           return;
         }
@@ -747,14 +721,21 @@ async function loadBackgrounds() {
         radioInput.value = background.replace(/\\/g, "/");
         radioInput.checked = background === settings.selectedBackground;
         radioInput.style.display = "none";
-        radioInput.addEventListener("change", () => selectBackground(background));
+        radioInput.addEventListener("change", () =>
+          selectBackground(background)
+        );
 
         const label = document.createElement("label");
         label.className = "background-preview-label";
         label.style.display = "inline-block";
         label.style.margin = "5px";
         label.style.cursor = "pointer";
-        label.innerHTML = `<img src="file://${background.replace(/\\/g, "/")}" alt="Background ${index + 1}" class="background-preview" style="width: 100px; height: 100px; object-fit: cover;" />`;
+        label.innerHTML = `<img src="file://${background.replace(
+          /\\/g,
+          "/"
+        )}" alt="Background ${
+          index + 1
+        }" class="background-preview" style="width: 100px; height: 100px; object-fit: cover;" />`;
         label.appendChild(radioInput);
         backgroundsDiv.appendChild(label);
       });
@@ -772,21 +753,25 @@ async function loadBackgrounds() {
     }
     backgroundsDiv.addEventListener("contextmenu", (event) => {
       event.preventDefault();
-      if (event.target.tagName === "IMG" && event.target.classList.contains("background-preview")) {
+      if (
+        event.target.tagName === "IMG" &&
+        event.target.classList.contains("background-preview")
+      ) {
         if (contextMenu) {
           contextMenu.remove();
         }
         contextMenu = document.createElement("div");
         contextMenu.className = "context-menu";
         contextMenu.style.position = "fixed";
-        contextMenu.style.zIndex = '50';
+        contextMenu.style.zIndex = "50";
         contextMenu.style.top = `${event.clientY}px`;
         contextMenu.style.left = `${event.clientX}px`;
         contextMenu.innerHTML =
           '<button class="rc-menu-btn" id="deleteBackgroundButton">Delete</button>';
-        document.body.appendChild(contextMenu); 
+        document.body.appendChild(contextMenu);
 
-        const backgroundPath = event.target.parentElement.querySelector("input").value;
+        const backgroundPath =
+          event.target.parentElement.querySelector("input").value;
         document
           .getElementById("deleteBackgroundButton")
           .addEventListener("click", async () => {
@@ -796,12 +781,11 @@ async function loadBackgrounds() {
           });
       }
     });
-    
   } catch (error) {
     console.error("Failed to load backgrounds:", error);
   }
 }
- 
+
 function removeBackgroundFromSettings(backgroundPath) {
   window.electronAPI.removeBackground(backgroundPath).then(() => {
     loadBackgrounds();
@@ -825,4 +809,11 @@ async function selectBackground(selectedBackground) {
     /\\/g,
     "/"
   )}')`;
+}
+
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return window.btoa(binary);
 }

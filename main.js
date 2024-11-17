@@ -67,6 +67,7 @@ app.on("ready", () => {
       contextIsolation: true,
       nodeIntegration: true,
       enableRemoteModule: false,
+      webSecurity: false,
     },
     autoHideMenuBar: true,
   });
@@ -87,12 +88,19 @@ ipcMain.handle("save-playlists", async (event, playlists) => {
   fs.writeFileSync(filePath, JSON.stringify(playlists, null, 2));
 });
 
-ipcMain.handle("select-audio-files", async () => {
-  const result = await dialog.showOpenDialog(mainWindow, {
-    properties: ["openFile", "multiSelections"],
-    filters: [{ name: "Audio Files", extensions: ["mp3", "wav", "ogg"] }],
+ipcMain.handle('select-audio-files', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openFile', 'multiSelections'],
+    filters: [
+      { name: 'Audio Files', extensions: ['mp3', 'wav', 'flac', 'ogg'] },
+    ],
   });
-  return result.filePaths;
+
+  if (result.canceled) {
+    return [];
+  } else {
+    return result.filePaths;
+  }
 });
 
 ipcMain.handle('check-file-exists', (event, filePath) => {
@@ -260,11 +268,19 @@ return settings;
 
 ipcMain.handle('get-metadata', async (event, filePath) => {
   try {
-      const metadata = await mm.parseFile(filePath, { duration: true });
+    const tags = NodeID3.read(filePath);
+    if (tags) {
+      const metadata = {
+        title: tags.title || 'Unknown Title',
+        artist: tags.artist || 'Unknown Artist',
+        image: tags.image ? tags.image : null,
+      };
       return metadata;
+    }
+    return null;
   } catch (error) {
-      console.error(`Error getting metadata for file ${filePath}:`, error);
-      return { error: error.message };
+    console.error(`Failed to read metadata from ${filePath}:`, error);
+    return null;
   }
 });
 

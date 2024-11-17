@@ -4,14 +4,23 @@ const NodeID3 = require('node-id3');
 contextBridge.exposeInMainWorld('electronAPI', {
     getMetadata: (filePath) => {
         try {
-            const tags = NodeID3.read(filePath);
-            console.log("ID3 Tags retrieved:", tags);
-            return tags;
+          const tags = NodeID3.read(filePath);
+          console.log("ID3 Tags retrieved:", tags);
+          if (tags && tags.image) {
+            return {
+              ...tags,
+              image: {
+                mime: tags.image.mime,
+                data: tags.image.imageBuffer
+              }
+            };
+          }
+          return tags;
         } catch (error) {
-            console.error("Failed to parse ID3 tags:", error);
-            return null;
+          console.error("Failed to parse ID3 tags:", error);
+          return null;
         }
-    },
+    },      
     loadPlaylists: () => ipcRenderer.invoke('load-playlists'),
     savePlaylists: (playlists) => ipcRenderer.invoke('save-playlists', playlists),
     selectAudioFiles: () => ipcRenderer.invoke('select-audio-files'),

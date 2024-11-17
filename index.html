@@ -10,13 +10,8 @@
       <div class="player">
         <div
           class="player-top"
-          style="
-            padding: 0px;
-            width: 100%;
-            cursor: grab;
-          "
-        >
-        </div>
+          style="padding: 0px; width: 100%; cursor: grab"
+        ></div>
         <div class="song-back-cont">
           <img
             id="cover-image"
@@ -147,74 +142,106 @@
           <span class="path-title">Path to Chrome</span>
           <button id="chooseChromeButton">Choose</button>
         </div>
-        <div class="background-wrap">
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              width: 100%;
-              margin-bottom: 10px;
-            "
-          >
-            <span class="background-title">Choose your background</span>
-            <button id="addBack" onclick="selectBackgroundImages()">
-              <img src="img/add-song.png" alt="add background" />
-            </button>
-          </div>
-          <div id="backgrounds">c</div>
+        <div id="chooseSectionBtn">
+          <button id="visualBtn" class="setting-btn-active">Visual</button>
+          <button id="soundBtn">Sound</button>
         </div>
-        <div style="width: 100%; border-top: 1px solid #fff; padding-top: 20px">
-          <div class="controls">
-            <div class="control-group">
-              <label class="clock-title" for="display-toggle">Clock</label>
+        <div class="settings-section" id="visualSettings">
+          <div class="background-wrap">
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                margin-bottom: 10px;
+              "
+            >
+              <span class="background-title">Choose your background</span>
+              <button id="addBack" onclick="selectBackgroundImages()">
+                <img src="img/add-song.png" alt="add background" />
+              </button>
+            </div>
+            <div id="backgrounds">c</div>
+          </div>
+          <div
+            style="width: 100%; border-top: 1px solid #fff; padding-top: 20px"
+          >
+            <div class="controls">
+              <div class="control-group">
+                <label class="clock-title" for="display-toggle">Clock</label>
+                <label class="switch">
+                  <input type="checkbox" id="display-toggle" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div class="control-group">
+                <label class="clock-settings" for="font-family">Type</label>
+                <select class="font-type" id="font-family">
+                  <option value="Digital">Digital</option>
+                  <option value="Digital Round">Digital Round</option>
+                </select>
+              </div>
+              <div class="control-group">
+                <label class="clock-settings" for="font-size">Size</label>
+                <input
+                  type="number"
+                  id="font-size"
+                  min="10"
+                  max="150"
+                  value="60"
+                />
+              </div>
+              <div class="control-group">
+                <label class="clock-settings" for="gradient-start"
+                  >Gradient Start Color:</label
+                >
+                <input type="color" id="gradient-start" value="#ff0099" />
+              </div>
+              <div class="control-group">
+                <label class="clock-settings" for="gradient-end"
+                  >Gradient End Color:</label
+                >
+                <input type="color" id="gradient-end" value="#61d32c" />
+              </div>
+            </div>
+          </div>
+          <div class="other-styles">
+            <div class="other-settings">
+              <span class="setting-title">Volume Bar</span>
+              <input type="color" id="olumeBar" value="#43e5f7" />
+            </div>
+            <div class="other-settings">
+              <span class="setting-title">Equalizer</span>
+              <div>
+                <input type="color" id="equalizer1" value="#43e5f7" />
+                <input type="color" id="equalizer2" value="#43e5f7" />
+                <input type="color" id="equalizer3" value="#43e5f7" />
+              </div>
+            </div>
+            <div class="other-settings">
+              <span class="setting-title">Small version</span>
               <label class="switch">
-                <input type="checkbox" id="display-toggle" />
+                <input type="checkbox" id="image-display-switch" />
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="control-group">
-              <label class="clock-settings" for="font-family">Type</label>
-              <select class="font-type" id="font-family">
-                <option value="Digital">Digital</option>
-                <option value="Digital Round">Digital Round</option>
-              </select>
-            </div>
-            <div class="control-group">
-              <label class="clock-settings" for="font-size">Size</label>
-              <input
-                type="number"
-                id="font-size"
-                min="10"
-                max="150"
-                value="60"
-              />
-            </div>
-            <div class="control-group">
-              <label class="clock-settings" for="gradient-start"
-                >Gradient Start Color:</label
-              >
-              <input type="color" id="gradient-start" value="#ff0099" />
-            </div>
-            <div class="control-group">
-              <label class="clock-settings" for="gradient-end"
-                >Gradient End Color:</label
-              >
-              <input type="color" id="gradient-end" value="#61d32c" />
-            </div>
           </div>
         </div>
-        <div class="other-styles">
-          <div class="other-settings">
-            <span class="setting-title">Volume Bar</span>
-            <input type="color" id="olumeBar" value="#43e5f7" />
-          </div>
-          <div class="other-settings">
-            <span class="setting-title">Small version</span>
-            <label class="switch">
-              <input type="checkbox" id="image-display-switch">
-              <span class="slider"></span>
-          </label>
+
+        <div style="display: none" class="settings-section" id="musicSettings">
+          <div class="equalizer">
+            <div class="knob-container">
+              <div id="lowKnob" class="knob">
+                <span class="knob-label">Low</span>
+              </div>
+              <div id="midKnob" class="knob">
+                <span class="knob-label">Middle</span>
+              </div>
+              <div id="highKnob" class="knob">
+                <span class="knob-label">High</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -240,5 +267,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="renderer.js"></script>
     <script src="visual.js"></script>
+    <script src="equalizer.js"></script>
   </body>
 </html>

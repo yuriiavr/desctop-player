@@ -1037,12 +1037,12 @@ input[type="color"]::-webkit-color-swatch {
   border: 1px solid #ffffffa6;
 }
 
-.supp-buttons-cont{
+.supp-buttons-cont {
   padding: 20px 0;
   display: flex;
 }
 
-.other-styles{
+.other-styles {
   padding-top: 20px;
   border-top: 1px solid #fff;
   width: 100%;
@@ -1051,13 +1051,97 @@ input[type="color"]::-webkit-color-swatch {
   flex-direction: column;
 }
 
-.other-settings{
+.other-settings {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.setting-title{
+.setting-title {
   color: #fff;
   font-size: 22px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  row-gap: 20px;
+  width: 100%;
+}
+
+#visualBtn,
+#soundBtn {
+  padding: 10px 20px;
+  cursor: pointer;
+  z-index: 50;
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  cursor: pointer;
+  flex: 0.5;
+}
+
+#visualBtn.setting-btn-active,
+#soundBtn.setting-btn-active {
+  color: #000;
+  background-color: #fff;
+  border: 1px solid #fff;
+}
+
+#chooseSectionBtn{
+  width: 100%;
+  display: flex;
+  column-gap: 10px;
+}
+
+.equalizer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+.knob-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.knob {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  background: conic-gradient(
+    #00ffcc 0deg,
+    #333333 0deg
+  );
+  border-radius: 50%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.knob::before {
+  content: '';
+  position: absolute;
+  top: 15%;
+  left: 15%;
+  width: 70%;
+  height: 70%;
+  background: #1f1f1f;
+  border-radius: 50%;
+}
+
+.knob-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.equalizer label{
+  color: #fff;
+  font-size: 28px;
 }
