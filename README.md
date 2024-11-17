@@ -41,5 +41,11 @@ Melomaniac is a desktop music player with the ability to download music from You
 ## License
 This project is licensed under the [MIT License](LICENSE).
 
-## Зворотній зв'язок
+## Feedback
 If you have suggestions or questions, please open an issue on [GitHub](https://github.com/username/myPlayer/issues).
+
+
+## Player Examples
+![App Screenshot](imageExamples/image11.png)
+![App Screenshot](imageExamples/image14.png)
+![App Screenshot](imageExamples/image15.png)

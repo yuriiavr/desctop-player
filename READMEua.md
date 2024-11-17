@@ -43,3 +43,7 @@ Melomaniac — це десктопний музичний плеєр з можл
 ## Зворотній зв'язок
 Якщо у вас є пропозиції або питання, будь ласка, відкрийте issue на [GitHub](https://github.com/username/myPlayer/issues).
 
+## Приклади плеєру
+![App Screenshot](imageExamples/image11.png)
+![App Screenshot](imageExamples/image14.png)
+![App Screenshot](imageExamples/image15.png)
