@@ -5,7 +5,6 @@ const puppeteer = require("puppeteer-extra");
 const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 const os = require("os");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
-const mm = require('music-metadata');
 
 puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
@@ -72,6 +71,30 @@ app.on("ready", () => {
     autoHideMenuBar: true,
   });
   mainWindow.loadFile("index.html");
+
+  mainWindow.loadFile('index.html');
+
+  mainWindow.once('ready-to-show', () => {
+      mainWindow.webContents.send('app-ready');
+  });
+
+  ipcMain.on('show-main-window', () => {
+      if (mainWindow) {
+          mainWindow.show();
+      } 
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+      app.quit();
+  }
+});
+
+app.on('activate', () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+  }
 });
 
 ipcMain.handle("load-playlists", async () => {

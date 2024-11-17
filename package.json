@@ -16,6 +16,7 @@
     "dist": "electron-builder"
   },
   "dependencies": {
+    "audiomotion-analyzer": "^4.5.0",
     "clipboardy": "^4.0.0",
     "music-metadata": "^10.6.0",
     "node-id3": "^0.2.6",

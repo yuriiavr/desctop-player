@@ -413,7 +413,7 @@ if (savedImageDisplay) {
   const imageSize = savedImageDisplay === "none" ? "40px" : "50px";
   playImg.style.width = imageSize;
   controlsImgs.forEach((img) => (img.style.width = imageSize));
-  volumeImg.style.display = savedImageDisplay === "none" ? "block" : "none";
+  volumeImg.style.display = savedImageDisplay === "none" ? "none" : "block";
 }
 
 imageSwitch.addEventListener("change", () => {
@@ -427,7 +427,7 @@ imageSwitch.addEventListener("change", () => {
   const imageSize = imageSwitch.checked ? "40px" : "50px";
   playImg.style.width = imageSize;
   controlsImgs.forEach((img) => (img.style.width = imageSize));
-  volumeImg.style.display = imageSwitch.checked ? "block" : "none";
+  volumeImg.style.display = imageSwitch.checked ? "none" : "block";
 });
 
 //Settings section

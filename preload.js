@@ -16,7 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
             };
           }
           return tags;
-        } catch (error) {
+        } catch (error) { 
           console.error("Failed to parse ID3 tags:", error);
           return null;
         }
@@ -38,4 +38,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveSelectedBackground: (selectedBackground) => ipcRenderer.invoke("save-selected-background", selectedBackground),
     selectBackgroundImages: () => ipcRenderer.invoke("select-background-images"),
     deleteBackground: (backgroundPath) => ipcRenderer.invoke("delete-background", backgroundPath),
+    onAppReady: (callback) => {
+        ipcRenderer.on('app-ready', callback);
+    },
+    showMainWindow: () => {
+        ipcRenderer.send('show-main-window');
+    }
 });  
