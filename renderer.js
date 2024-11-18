@@ -12,20 +12,23 @@ let savedSortBy = localStorage.getItem("savedSortBy") || "title";
 let sortable;
 let isPlaying = false;
 let contextMenu;
+let repeatMode = 0;
+
 function pathExistsInAll(path) {
   return playlists["All"].some((song) => song.path === path);
 }
 
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
 const track = audioContext.createMediaElementSource(audio);
+
+const repeatButton = document.getElementById("repeatButton");
+repeatButton.addEventListener("click", toggleRepeatMode);
 
 document.addEventListener("DOMContentLoaded", async () => {
   const loader = document.getElementById("loader");
   const appContent = document.getElementById("app");
   let appReady = false;
 
-  // Коли Electron надсилає подію про готовність додатку
   window.electronAPI.onAppReady(() => {
     appReady = true;
     hideLoaderAndShowApp();
@@ -33,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function hideLoaderAndShowApp() {
     if (appReady) {
-
       if (loader) {
         loader.style.display = "none";
       }
@@ -42,7 +44,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         appContent.style.display = "block";
       }
 
-      // Надсилаємо подію до основного процесу для показу головного вікна
       window.electronAPI.showMainWindow();
     }
   }
@@ -274,6 +275,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
+function toggleRepeatMode() {
+  repeatMode = (repeatMode + 1) % 3;
+
+  switch (repeatMode) {
+    case 0:
+      repeatButton.innerHTML =
+        '<svg class="no-repeat"><use href="img/sprite.svg#repeat"></use></svg>';
+      break;
+    case 1:
+      repeatButton.innerHTML =
+        '<svg class="repeat"><use href="img/sprite.svg#repeat"></use></svg>';
+      break;
+    case 2:
+      repeatButton.innerHTML =
+        '<svg class="repeat"><use href="img/sprite.svg#repeat-one"></use></svg>';
+      break;
+  }
+}
+
 document.getElementById("downloadButton").addEventListener("click", () => {
   const youtubeUrl = document.getElementById("youtubeInput").value.trim();
 
@@ -438,13 +458,23 @@ function playSongAtIndex(index) {
 
 function next() {
   const songs = playlists[currentPlaylistName] || [];
-  currentIndex = (currentIndex + 1) % songs.length;
-  audio.src = `file://${songs[currentIndex].path}`;
+
+  if (repeatMode === 2) {
+    playNewTrack(songs[currentIndex].path);
+  } else {
+    currentIndex = (currentIndex + 1) % songs.length;
+
+    if (currentIndex === 0 && repeatMode === 0) {
+      audio.pause();
+      playStopButton.innerHTML = '<img src="img/play.png" alt="play" />';
+      return;
+    }
+
+    playNewTrack(songs[currentIndex].path);
+  }
+
   audio.play();
   playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
-  audio.onended = () => next();
-  displayPlaylist();
-  playNewTrack(songs[currentIndex].path);
 }
 
 function previous() {
@@ -556,8 +586,14 @@ async function playNewTrack(filePath) {
   const artistElement = document.querySelector(".song-data .artist");
   const coverImageElement = document.getElementById("cover-image");
 
-  if (songNameElement) songNameElement.textContent = songTitle;
-  if (artistElement) artistElement.textContent = artist;
+  if (songNameElement) {
+    songNameElement.textContent = songTitle;
+    applyScrollingIfNeeded(songNameElement);
+  }
+  if (artistElement) {
+    artistElement.textContent = artist;
+    applyScrollingIfNeeded(artistElement);
+  }
   if (coverImageElement) {
     coverImageElement.src = coverImageURL;
 
@@ -578,6 +614,25 @@ async function playNewTrack(filePath) {
     },
     { once: true }
   );
+
+  audio.onended = () => {
+    if (repeatMode === 2) {
+      playNewTrack(filePath);
+    } else {
+      next();
+    }
+  };
+}
+
+function applyScrollingIfNeeded(element) {
+  if (element.scrollWidth > element.clientWidth) {
+    const innerSpan = document.createElement("span");
+    innerSpan.classList.add("scrollable-text");
+    innerSpan.textContent = element.textContent;
+
+    element.innerHTML = "";
+    element.appendChild(innerSpan);
+  }
 }
 
 function getFileName(filePath) {
@@ -687,8 +742,6 @@ function startDownload(youtubeUrl) {
 window.electronAPI.onUpdateProgress((event, data) => {
   const progressBar = document.getElementById("progressDownloadBar");
   const progressText = document.getElementById("progressText");
-
-  console.log("Received progress update:", data);
 
   if (data.progress) {
     progressBar.value = data.progress;
@@ -980,20 +1033,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function hideLoaderAndShowApp() {
   if (appReady) {
-      console.log("Показуємо додаток і приховуємо лоудер");
+    if (loader) {
+      loader.classList.add("hidden");
+      setTimeout(() => {
+        loader.style.display = "none";
+      }, 500);
+    }
 
-      if (loader) {
-          loader.classList.add("hidden");
-          setTimeout(() => {
-              loader.style.display = "none";
-          }, 500); // Час затримки для завершення анімації прозорості
-      }
+    if (appContent) {
+      appContent.style.display = "block";
+    }
 
-      if (appContent) {
-          appContent.style.display = "block";
-      }
-
-      // Надсилаємо подію до основного процесу для показу головного вікна
-      window.electronAPI.showMainWindow();
+    window.electronAPI.showMainWindow();
   }
 }
+

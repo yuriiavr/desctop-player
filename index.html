@@ -6,7 +6,10 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body style="background-size: cover">
-    
+    <div id="drag-bar">
+      <span>Melomaniac</span>
+    </div>
+
     <div id="loader" class="loader-container">
       <svg width="0" height="0">
         <filter id="f" x="-50%" y="-200%" width="200%" height="500%" primitiveUnits="objectBoundingBox">
@@ -37,6 +40,7 @@
               <span class="artist">Artist</span>
             </div>
           </div>
+          <button id="repeatButton"><svg class="no-repeat" width="40" height="40"><use href="img/sprite.svg#repeat"></use></svg></button>
           <div>
             <span class="time" id="currentTime">0:00</span>
             <input type="range" id="progressBar" min="0" max="100" value="0" />
@@ -123,7 +127,7 @@
             <input
               type="text"
               id="searchInput"
-              placeholder="Search by title or artist"
+              placeholder="Search..."
             />
             <select id="sortSelect">
               <option value="date">Date Added</option>
@@ -147,13 +151,10 @@
           </div>
         </div>
         <div id="settings-wrap">
-          <div class="path-wrap">
-            <span class="path-title">Path to Chrome</span>
-            <button id="chooseChromeButton">Choose</button>
-          </div>
           <div id="chooseSectionBtn">
             <button id="visualBtn" class="setting-btn-active">Visual</button>
             <button id="soundBtn">Sound</button>
+            <button id="otherBtn">Other</button>
           </div>
           <div class="settings-section" id="visualSettings">
             <div class="background-wrap">
@@ -171,7 +172,7 @@
                   <img src="img/add-song.png" alt="add background" />
                 </button>
               </div>
-              <div id="backgrounds">c</div>
+              <div id="backgrounds"></div>
             </div>
             <div
               style="width: 100%; border-top: 1px solid #fff; padding-top: 20px"
@@ -235,6 +236,21 @@
                   <span class="slider"></span>
                 </label>
               </div>
+              <div class="other-settings">
+                <label class="setting-title" for="font-family">Font Type</label>
+                <select class="font-type" id="basic-font-family">
+                  <option value="Academy">Academy</option>
+                  <option value="AdonisC">AdonisC</option>
+                  <option value="Evolventa Bold">Evolventa Bold</option>
+                  <option value="Evolventa Bold Oblique">Evolventa Bold Oblique</option>
+                  <option value="Evolventa Oblique">Evolventa Oblique</option>
+                  <option value="Evolventa Regular">Evolventa Regular</option>
+                  <option value="Fredoka Regular">Fredoka Regular</option>
+                  <option value="Oswald">Oswald</option>
+                  <option value="Playfair Display Italic">Playfair Display Italic</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                </select>
+              </div>
             </div>
           </div>
           <div style="display: none" class="settings-section" id="musicSettings">
@@ -250,6 +266,12 @@
                   <span class="knob-label">High</span>
                 </div>
               </div>
+            </div>
+          </div>
+          <div style="display: none" class="settings-section" id="otherSettings">
+            <div class="path-wrap">
+              <span class="path-title">Path to Chrome</span>
+              <button id="chooseChromeButton">Choose</button>
             </div>
           </div>
         </div>
@@ -273,7 +295,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script src="renderer.js"></script>
     <script src="visual.js"></script>
-    <script src="equalizer.js"></script>
-    <script src="sound-reaction.js"></script>
   </body>
 </html>

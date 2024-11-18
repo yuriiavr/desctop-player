@@ -211,6 +211,20 @@ fontFamilySelect.addEventListener("change", () => {
 loadDisplayState();
 loadClockSettings();
 
+const basicFontFamilySelect = document.getElementById("basic-font-family");
+const savedbasicFontFamily = localStorage.getItem("basicFontFamily");
+if (savedbasicFontFamily) {
+  document.body.style.fontFamily = savedbasicFontFamily;
+  basicFontFamilySelect.value = savedbasicFontFamily;
+}
+
+basicFontFamilySelect.addEventListener("change", () => {
+  document.body.style.fontFamily = basicFontFamilySelect.value;
+  localStorage.setItem("basicFontFamily", basicFontFamilySelect.value);
+});
+loadDisplayState();
+loadClockSettings();
+
 const wrap = document.querySelector(".wrap");
 
 const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
@@ -350,6 +364,50 @@ document.addEventListener("mousemove", (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  const mainFunctions = document.querySelector(".main-functions");
+  const offButton = document.getElementById("off-btn");
+  const dragBar = document.getElementById("drag-bar");
+  const playerWrapper = document.querySelector(".player");
+  const fullPlayerWrapper = document.querySelector(".wrap");
+
+  function updateVisibilityBasedOnWindowSize() {
+    const isFullscreen = window.outerWidth >= screen.width && window.outerHeight >= screen.height;
+
+    if (isFullscreen) {
+      if (dragBar) dragBar.style.display = "none";
+      if (mainFunctions) mainFunctions.style.display = "flex";
+      if (offButton) offButton.style.display = "block";
+      if (playerWrapper) playerWrapper.style.borderRadius = "20px"
+      if (fullPlayerWrapper) fullPlayerWrapper.style.top = "40%"
+      if (fullPlayerWrapper) fullPlayerWrapper.style.left = "40%"
+    } else {
+      if (dragBar) dragBar.style.display = "flex";
+      if (mainFunctions) mainFunctions.style.display = "none";
+      if (offButton) offButton.style.display = "none";
+      if (playerWrapper) playerWrapper.style.borderRadius = "0px"
+      if (fullPlayerWrapper) fullPlayerWrapper.style.top = "0"
+      if (fullPlayerWrapper) fullPlayerWrapper.style.left = "0"
+    }
+  }
+
+  updateVisibilityBasedOnWindowSize();
+
+  window.addEventListener("resize", updateVisibilityBasedOnWindowSize);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "F11") {
+      setTimeout(updateVisibilityBasedOnWindowSize, 500);
+      window.resizeTo(500, 300);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.key === "m") {
+      window.resizeTo(500, 300);
+      setTimeout(updateVisibilityBasedOnWindowSize, 500);
+    }
+  });
+
   const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
   if (savedPosition) {
     wrap.style.left = savedPosition.left;
@@ -372,24 +430,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function updateVolumeBarColor(color) {
   const styleSheet = document.styleSheets[0];
-  let ruleExists = false;
+  let ruleExistsVolume = false;
+  let ruleExistsRepeat = false;
 
   for (let i = 0; i < styleSheet.cssRules.length; i++) {
-    if (
-      styleSheet.cssRules[i].selectorText ===
-      'input[type="range"]::-webkit-slider-thumb'
-    ) {
-      styleSheet.cssRules[
-        i
-      ].style.boxShadow = `calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}`;
-      ruleExists = true;
-      break;
+    const rule = styleSheet.cssRules[i];
+
+    if (rule.selectorText === 'input[type="range"]::-webkit-slider-thumb') {
+      rule.style.boxShadow = `calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}`;
+      ruleExistsVolume = true;
+    }
+
+    if (rule.selectorText === ".repeat") {
+      rule.style.fill = color;
+      ruleExistsRepeat = true;
     }
   }
 
-  if (!ruleExists) {
+  if (!ruleExistsVolume) {
     styleSheet.insertRule(
       `input[type="range"]::-webkit-slider-thumb { box-shadow: calc(-1 * var(--slider-width)) 0 0 var(--slider-width) ${color}; }`,
+      styleSheet.cssRules.length
+    );
+  }
+
+  if (!ruleExistsRepeat) {
+    styleSheet.insertRule(
+      `.repeat { fill: ${color}; }`,
       styleSheet.cssRules.length
     );
   }
@@ -434,21 +501,37 @@ imageSwitch.addEventListener("change", () => {
 
 const visualBtn = document.getElementById("visualBtn");
 const soundBtn = document.getElementById("soundBtn");
+const otherBtn = document.getElementById("otherBtn");
 const visualSettings = document.getElementById("visualSettings");
 const musicSettings = document.getElementById("musicSettings");
+const otherSettings = document.getElementById("otherSettings");
 
 visualBtn.addEventListener("click", () => {
   visualSettings.style.display = "flex";
   musicSettings.style.display = "none";
+  otherSettings.style.display = "none";
 
   visualBtn.classList.add("setting-btn-active");
   soundBtn.classList.remove("setting-btn-active");
+  otherBtn.classList.remove("setting-btn-active");
 });
 
 soundBtn.addEventListener("click", () => {
   musicSettings.style.display = "flex";
   visualSettings.style.display = "none";
+  otherSettings.style.display = "none";
 
   soundBtn.classList.add("setting-btn-active");
   visualBtn.classList.remove("setting-btn-active");
+  otherBtn.classList.remove("setting-btn-active");
+});
+
+otherBtn.addEventListener("click", () => {
+  musicSettings.style.display = "none";
+  visualSettings.style.display = "none";
+  otherSettings.style.display = "flex";
+
+  soundBtn.classList.remove("setting-btn-active");
+  visualBtn.classList.remove("setting-btn-active");
+  otherBtn.classList.add("setting-btn-active");
 });

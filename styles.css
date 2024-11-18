@@ -3,6 +3,8 @@ body {
   width: 100vw;
   overflow: hidden;
   background-image: url("img/back.jpg");
+  font-family: 'Oswald';
+  margin: 0;
 }
 
 @font-face {
@@ -15,6 +17,56 @@ body {
   src: url(fonts/e1234.regular.ttf);
 }
 
+@font-face {
+  font-family: "Academy";
+  src: url(fonts/Academy.ttf);
+}
+
+@font-face {
+  font-family: "Evolventa Bold";
+  src: url(fonts/Evolventa-Bold.ttf);
+}
+
+@font-face {
+  font-family: "Fredoka Regular";
+  src: url(fonts/Fredoka-Regular.ttf);
+}
+
+@font-face {
+  font-family: "Oswald";
+  src: url(fonts/Oswald.ttf);
+}
+
+@font-face {
+  font-family: "Playfair Display";
+  src: url(fonts/PlayfairDisplay.ttf);
+}
+
+@font-face {
+  font-family: "Playfair Display Italic";
+  src: url(fonts/PlayfairDisplay-Italic.ttf);
+}
+
+@font-face {
+  font-family: "Evolventa Regular";
+  src: url(fonts/Evolventa-Regular.ttf);
+}
+
+
+@font-face {
+  font-family: "AdonisC";
+  src: url(fonts/AdonisC.ttf);
+}
+
+@font-face {
+  font-family: "Evolventa Bold Oblique";
+  src: url(fonts/Evolventa-BoldOblique.ttf);
+}
+
+@font-face {
+  font-family: "Evolventa Oblique";
+  src: url(fonts/Evolventa-Oblique.ttf);
+}
 .scrollbar::-webkit-scrollbar {
   background-color: #121212d8;
   width: 10px;
@@ -53,6 +105,8 @@ body {
 .wrap {
   position: relative;
   max-width: 600px;
+  top: 0;
+  left: 0;
 }
 
 .player {
@@ -73,8 +127,6 @@ body {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
-  margin-bottom: 10px;
-  padding: 10px 0;
 }
 
 .control-btn {
@@ -206,12 +258,24 @@ input[type="range"]::-ms-fill-upper {
   color: #fff;
   font-size: 32px;
   text-align: center;
+  font-family: 'Evolventa Bold';
+  white-space: nowrap;
+  max-width: 400px;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
 }
 
 .artist {
   color: #fff;
   font-size: 22px;
   text-align: center;
+  font-family: 'Evolventa Bold';
+  white-space: nowrap;
+  max-width: 400px;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
 }
 
 .volume {
@@ -420,11 +484,17 @@ input[type="range"]::-ms-fill-upper {
   justify-content: center;
   background-color: #121212d8;
   padding: 10px;
+  margin: 5px;
   border-radius: 10px;
+  transition: all 0.5s ease;
 }
 
 .icon-open img:first-child {
   width: 60px;
+}
+
+.icon-open img{
+  transition: all 0.5s ease;
 }
 
 .menu {
@@ -505,6 +575,7 @@ input[type="range"]::-ms-fill-upper {
 #playlistName::placeholder {
   color: #fff;
   font-size: 14px;
+  font-family: 'Oswald';
 }
 
 #renamePlaylistInput {
@@ -555,12 +626,24 @@ input[type="range"]::-ms-fill-upper {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 20px;
+  padding: 10px 15px;
+}
+
+#renamePlaylistButton:hover, #renamePlaylistButton:focus{
+  background-color: #616060;
 }
 
 #deletePlaylist {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 20px;
+  padding: 10px 15px;
+}
+
+#deletePlaylist:hover, #deletePlaylist:focus{
+  background-color: #616060;
 }
 
 #renamePlaylistButton img {
@@ -575,6 +658,12 @@ input[type="range"]::-ms-fill-upper {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 20px;
+  padding: 10px 15px;
+}
+
+#createPlaylist:hover, #createPlaylist:focus{
+  background-color: #616060;
 }
 
 #createPlaylist img {
@@ -585,10 +674,16 @@ input[type="range"]::-ms-fill-upper {
   background-color: transparent;
   border: none;
   cursor: pointer;
+  border-radius: 20px;
+  padding: 10px 15px;
+}
+
+#addSong:hover, #addSong:focus{
+  background-color: #616060;
 }
 
 #addSong img {
-  max-width: 30px;
+  width: 35px;
 }
 
 #space {
@@ -668,20 +763,24 @@ input[type="range"]::-ms-fill-upper {
   background-color: transparent;
   border: 1px solid #fff;
   font-size: 18px;
-  padding: 5px 10px;
+  padding: 10px 15px;
   color: #fff;
+  font-family: 'Oswald';
 }
 
 #searchInput::placeholder {
   color: #fff;
+  font-size: 22px;
+  font-family: 'Oswald';
 }
 
 #sortSelect {
   background-color: transparent;
   border: 1px solid #fff;
-  font-size: 18px;
-  padding: 5px 10px;
+  font-size: 22px;
+  padding: 5px 15px;
   color: #fff;
+  font-family: 'Oswald';
 }
 
 option {
@@ -695,6 +794,7 @@ option {
   list-style: none;
   padding-left: 0;
   width: 100%;
+  font-family: 'Oswald';
 }
 
 .song-name {
@@ -719,6 +819,7 @@ option {
   font-size: 22px;
   text-transform: uppercase;
   text-align: center;
+  font-family: 'Oswald';
 }
 
 #youtubeInput {
@@ -729,6 +830,7 @@ option {
   flex: 0.7;
   margin-right: 20px;
   padding: 5px 10px;
+  font-family: 'Oswald';
 }
 
 #youtubeInput::placeholder {
@@ -745,11 +847,13 @@ option {
   border: 1px solid #fff;
   background-color: transparent;
   color: #fff;
-  font-size: 18px;
+  font-size: 22px;
+  letter-spacing: 1px;
   padding: 7px 10px;
   cursor: pointer;
   transition: all 0.5s ease;
   flex: 0.3;
+  font-family: 'Oswald';
 }
 
 #downloadButton:hover,
@@ -782,6 +886,7 @@ option {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  font-family: 'Oswald';
 }
 
 #progressDownloadBar {
@@ -833,8 +938,7 @@ option {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #fff;
+  font-family: 'Oswald';
 }
 
 #off-btn {
@@ -1008,6 +1112,7 @@ input[type="color"]::-webkit-color-swatch {
   color: #fff;
   cursor: pointer;
   padding: 5px 15px;
+  font-family: 'Oswald';
 }
 
 .player-top {
@@ -1070,7 +1175,7 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #visualBtn,
-#soundBtn {
+#soundBtn, #otherBtn {
   padding: 10px 20px;
   cursor: pointer;
   z-index: 50;
@@ -1084,7 +1189,8 @@ input[type="color"]::-webkit-color-swatch {
 }
 
 #visualBtn.setting-btn-active,
-#soundBtn.setting-btn-active {
+#soundBtn.setting-btn-active,
+#otherBtn.setting-btn-active {
   color: #000;
   background-color: #fff;
   border: 1px solid #fff;
@@ -1194,4 +1300,91 @@ svg[height='0'] { position: absolute }
 #loader.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+.icon-open:hover, .icon-open:focus{
+  padding: 15px;
+  margin: 0;
+}
+
+.icon-open:hover img, .icon-open:focus img{
+  width: 70px;
+}
+
+#off-btn:hover, #off-btn:focus{
+  margin-bottom: 45px;
+}
+
+@keyframes scrollText {
+  0% {
+      transform: translateX(0%);
+  }
+  20% {
+      transform: translateX(0%);
+  }
+  50% {
+      transform: translateX(-100%);
+  }
+  50.01% {
+      transform: translateX(60%);
+  }
+  80%{
+    transform: translateX(0%)
+  }
+  100% {
+      transform: translateX(0%);
+  }
+}
+
+.scrollable-text {
+  display: inline-block;
+  animation: scrollText 15s linear infinite;
+}
+
+#repeatButton{
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.no-repeat,
+.repeat {
+  width: 40px;
+  height: 40px;
+  fill: #fff;
+}
+
+#drag-bar {
+  -webkit-app-region: drag;
+  background-color: transparent;
+  color: white;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  cursor: grab;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+#content {
+  padding: 20px;
+}
+
+button, .icon-open {
+  -webkit-app-region: no-drag;
+}
+
+.hidden {
+  display: none;
+}
+
+#app{
+  width: 100%;
+  height: 100%;
 }

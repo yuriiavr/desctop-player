@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, clipboard } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, clipboard, globalShortcut, screen } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const puppeteer = require("puppeteer-extra");
@@ -58,8 +58,21 @@ ipcMain.handle("choose-chrome-path", async () => {
 });
 
 app.on("ready", () => {
+  const settings = loadSettings();
+  const isFullscreen = settings.isFullscreen;
+
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: screenWidth, height: screenHeight } = primaryDisplay.size;
+
+  // Початкове створення вікна
   mainWindow = new BrowserWindow({
-    fullscreen: true,
+    width: isFullscreen ? screenWidth : 500,
+    height: isFullscreen ? screenHeight : 280,
+    x: isFullscreen ? 0 : Math.floor((screenWidth - 500) / 2),
+    y: isFullscreen ? 0 : Math.floor((screenHeight - 280) / 2),
+    fullscreen: isFullscreen,
+    frame: false,
+    resizable: false,
     icon: path.join(__dirname, "img", "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
@@ -70,19 +83,73 @@ app.on("ready", () => {
     },
     autoHideMenuBar: true,
   });
+
   mainWindow.loadFile("index.html");
 
-  mainWindow.loadFile('index.html');
-
   mainWindow.once('ready-to-show', () => {
-      mainWindow.webContents.send('app-ready');
+    mainWindow.webContents.send('app-ready', isFullscreen);
+    if (isFullscreen) {
+      mainWindow.setBounds({
+        x: 0,
+        y: 0,
+        width: screenWidth,
+        height: screenHeight,
+      });
+    } else {
+      mainWindow.center();
+    }
   });
 
   ipcMain.on('show-main-window', () => {
-      if (mainWindow) {
-          mainWindow.show();
-      } 
+    if (mainWindow) {
+      mainWindow.show();
+    }
   });
+
+  globalShortcut.register('F11', () => {
+    toggleFullscreen();
+  });
+
+  globalShortcut.register('Ctrl+M', () => {
+    toggleFullscreen();
+  });
+
+  function toggleFullscreen() {
+    const isCurrentlyFullscreen = mainWindow.isFullScreen();
+
+    if (isCurrentlyFullscreen) {
+      mainWindow.setFullScreen(false);
+      mainWindow.setBounds({
+        width: 500,
+        height: 280,
+        x: Math.floor((screenWidth - 500) / 2),
+        y: Math.floor((screenHeight - 280) / 2)
+      });
+      saveWindowSettings(false);
+      mainWindow.webContents.send('fullscreen-mode', false);
+    } else {
+      // Переключення на повноекранний режим
+      mainWindow.setBounds({
+        x: 0,
+        y: 0,
+        width: screenWidth,
+        height: screenHeight
+      });
+      mainWindow.setFullScreen(true);
+      saveWindowSettings(true);
+      mainWindow.webContents.send('fullscreen-mode', true);
+    }
+  }
+});
+
+function saveWindowSettings(isFullscreen) {
+  const settings = loadSettings();
+  settings.isFullscreen = isFullscreen;
+  saveSettings(settings);
+}
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
 
 app.on('window-all-closed', () => {
