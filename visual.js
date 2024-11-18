@@ -1,11 +1,16 @@
-const openListBtn = document.getElementById("playlist-btn");
+const openListBtn = document.getElementById("playlistMini");
 const openDownloadBtn = document.getElementById("ytdownload");
 const openSettingsBtn = document.getElementById("settings");
 
 const openListWrap = document.getElementById("playlist-wrap");
-const openMiniPlaylist = document.getElementById("playlistMini")
 const openDownloadWrap = document.getElementById("download-wrap");
 const openSettingsWrap = document.getElementById("settings-wrap");
+const closePlaylist = document.getElementById('close-playlist')
+
+closePlaylist.addEventListener('click', function(){
+  openListWrap.style.display = 'none';
+  closePlaylist.style.display = "none"
+})
 
 function toggleExclusive(openElement, ...closeElements) {
   if (openElement.style.display === "flex") {
@@ -15,14 +20,12 @@ function toggleExclusive(openElement, ...closeElements) {
     openElement.style.display = "flex";
   }
   saveDisplayState();
-}
-
-openMiniPlaylist.addEventListener("click", function() {
-  openListWrap.style.display = "flex"
-})
+} 
 
 openListBtn.addEventListener("click", function () {
   toggleExclusive(openListWrap, openDownloadWrap, openSettingsWrap);
+  scrollToActiveSong();
+  closePlaylist.style.display = "block"
 });
 
 openDownloadBtn.addEventListener("click", function () {
@@ -245,9 +248,13 @@ document.addEventListener("DOMContentLoaded", () => {
   let isDraggingWrap = false; // Відслідковуємо тільки wrap
   let offset = { x: 0, y: 0 };
 
+  function isSmallVersion() {
+    return window.innerWidth <= 500;
+  }
+  
   // Початок перетягування wrap
   grabCont.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || isSmallVersion()) return;
 
     const playerTop = e.target.closest(".player-top");
     if (playerTop) {
@@ -297,6 +304,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       wrap.style.left = `${newX}px`;
       wrap.style.top = `${newY}px`;
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (isSmallVersion()) {
+      wrap.style.left = "0";
+      wrap.style.top = "0";
+      grabCont.style.cursor = "default";
+      isDraggingWrap = false; // Забороняємо перетягування
     }
   });
 });
@@ -372,11 +388,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const wrap = document.querySelector(".wrap");
   const playlistsCont = document.querySelectorAll(".playlist-cont")
   const freeSpace = document.getElementById("space")
+  const clock = document.getElementById("clock")
 
   function updateVisibilityBasedOnWindowSize() {
     const isFullscreen = window.outerWidth >= screen.width && window.outerHeight >= screen.height;
   
     if (isFullscreen) {
+      const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
+
       if (dragBar) dragBar.style.display = "none";
       if (mainFunctions) mainFunctions.style.display = "flex";
       if (offButton) offButton.style.display = "block";
@@ -386,9 +405,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       if (playlistWrap) playlistWrap.style.maxWidth = "600px"
       if (freeSpace) freeSpace.style.display = "flex"
-      
-  
-      const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
+      if (playlistWrap) playlistWrap.style.paddingTop = "20px"
+      if (clock) clock.style.display = 'block'
       if (savedPosition) {
         fullPlayerWrapper.style.left = savedPosition.left;
         fullPlayerWrapper.style.top = savedPosition.top;
@@ -404,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (offButton) offButton.style.display = "none";
       if (playerWrapper) playerWrapper.style.borderRadius = "0px";
       fullPlayerWrapper.style.left = "0";
-      fullPlayerWrapper.style.top = "0";
+      fullPlayerWrapper.style.top = "0"; 
       if (settingsWrap) settingsWrap.style.display = "none";
       if (downloadWrap) downloadWrap.style.display = "none";
       if (playlistWrap) playlistWrap.style.display = "none";
@@ -412,7 +430,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if ((index + 1) % 2 === 0) { cont.style.display = "none"}
       });
       if (playlistWrap) playlistWrap.style.maxWidth = "450px"
+      if (playlistWrap) playlistWrap.style.paddingTop = "25px"
       if (freeSpace) freeSpace.style.display = "none"
+      if (clock) clock.style.display = 'none'
     }
   }
 
@@ -429,7 +449,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const imageSize = "40px";
       playImg.style.width = imageSize;
       controlsImgs.forEach((img) => (img.style.width = imageSize));
-      volumeImg.style.display = "none";
+      volumeImg.style.display = "none"; 
     } else {
       const savedImageDisplay = localStorage.getItem("coverImageDisplay");
       coverImage.style.display = savedImageDisplay || "block";
@@ -613,16 +633,5 @@ function scrollToActiveSong() {
 
   if (activeSong) {
     activeSong.scrollIntoView({ behavior: "smooth", block: "center" });
-    console.log("Scrolled to active song:", activeSong.textContent);
   }
 }
-
-openListBtn.addEventListener("click", function () {
-  toggleExclusive(openListWrap, openDownloadWrap, openSettingsWrap);
-  scrollToActiveSong();
-});
-
-openMiniPlaylist.addEventListener("click", function () {
-  openListWrap.style.display = "flex";
-  scrollToActiveSong();
-});

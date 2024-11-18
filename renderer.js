@@ -31,45 +31,106 @@ document.addEventListener("DOMContentLoaded", async () => {
   const mode = await window.electronAPI.getWindowMode();
   const fullPlayerWrapper = document.querySelector(".wrap");
 
+  await loadAllPlaylists();
+  await loadCurrentSongIndex();  
+  displayPlaylist();
+
   if (mode === "minimized") {
     fullPlayerWrapper.style.left = "0";
     fullPlayerWrapper.style.top = "0";
   } 
 
   const dragBar = document.querySelector(".player-top");
-  let isDraggingWindow = false;
-  let windowOffset = { x: 0, y: 0 };
+  let isDraggingWrap = false; // Для wrap
+  let offset = { x: 0, y: 0 };
 
-  dragBar.addEventListener("mousedown", (e) => {
-    if (e.button !== 0) return;
+  function isSmallWindow() {
+    return window.innerWidth <= 500; // Маленьке вікно визначається як ширина <= 500px
+  }
 
-    isDraggingWindow = true;
-    const bounds = window.electronAPI.startWindowDrag(); // Отримуємо bounds вікна
-    windowOffset = {
-      x: e.clientX - bounds.x,
-      y: e.clientY - bounds.y,
-    };
-    document.body.style.cursor = "grabbing";
-  });
+  function resetWrapPositionIfSmallWindow() {
+    if (isSmallWindow()) {
+      wrap.style.left = "0";
+      wrap.style.top = "0";
+      wrap.style.position = "absolute"; // Переконуємося, що позиція встановлена як абсолютна
+      localStorage.removeItem("wrapPosition"); // Не зберігаємо позицію для маленького вікна
+    }
+  }
 
   // Завершення перетягування вікна
   document.addEventListener("mouseup", () => {
-    if (isDraggingWindow) {
-      isDraggingWindow = false;
+    if (isDraggingWrap) {
+      isDraggingWrap = false;
       document.body.style.cursor = "default";
-      window.electronAPI.saveWindowPosition(); // Зберігаємо позицію вікна
+
+      // Зберігаємо позицію wrap у localStorage
+      localStorage.setItem(
+        "wrapPosition",
+        JSON.stringify({
+          left: wrap.style.left,
+          top: wrap.style.top,
+        })
+      );
     }
   });
 
   // Перетягування вікна
   document.addEventListener("mousemove", (e) => {
-    if (isDraggingWindow) {
-      const deltaX = e.clientX - windowOffset.x;
-      const deltaY = e.clientY - windowOffset.y;
+    if (isDraggingWrap) {
+      const newX = e.clientX - offset.x;
+      const newY = e.clientY - offset.y;
 
-      window.electronAPI.updateWindowPosition({ deltaX, deltaY });
+      const bodyRect = document.body.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+
+      wrap.style.left = `${Math.max(0, Math.min(newX, bodyRect.width - wrapRect.width))}px`;
+      wrap.style.top = `${Math.max(0, Math.min(newY, bodyRect.height - wrapRect.height))}px`;
     }
   });
+
+  dragBar.addEventListener("mousedown", (e) => {
+    if (e.button !== 0 || e.target !== dragBar) return;
+
+    const rect = wrap.getBoundingClientRect();
+    isDraggingWrap = true;
+    offset = {
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
+    };
+
+    document.body.style.cursor = "grabbing";
+  });
+
+  const savedWrapPosition = JSON.parse(localStorage.getItem("wrapPosition"));
+  if (savedWrapPosition && !isSmallWindow()) {
+    wrap.style.left = savedWrapPosition.left;
+    wrap.style.top = savedWrapPosition.top;
+  } else {
+    resetWrapPositionIfSmallWindow();
+  }
+
+  // Подвійний клік для центрування wrap
+  dragBar.addEventListener("dblclick", () => {
+    if (isSmallWindow()) return; // Не дозволяємо центрування в маленькому вікні
+
+    const bodyRect = document.body.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+
+    const newLeft = (bodyRect.width - wrapRect.width) / 2;
+    const newTop = (bodyRect.height - wrapRect.height) / 2;
+
+    wrap.style.left = `${newLeft}px`;
+    wrap.style.top = `${newTop}px`;
+
+    // Зберігаємо нову позицію
+    localStorage.setItem(
+      "wrapPosition",
+      JSON.stringify({ left: `${newLeft}px`, top: `${newTop}px` })
+    );
+  });
+
+  window.addEventListener("resize", resetWrapPositionIfSmallWindow);
+  resetWrapPositionIfSmallWindow();
 
   window.electronAPI.onAppReady(() => {
     appReady = true;
@@ -489,29 +550,34 @@ function saveCurrentPlaylist() {
 }
 
 function playSongAtIndex(index) {
-  currentIndex = index;
-  const filePath = playlists[currentPlaylistName][currentIndex].path;
-  audio.play();
-  playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
-  audio.onended = () => next();
-  displayPlaylist();
-  playNewTrack(filePath);
+  const songs = playlists[currentPlaylistName] || [];
+  if (index >= 0 && index < songs.length) {
+    const savedData = {
+      playlist: currentPlaylistName,
+      index: index,
+    };
+    localStorage.setItem("currentSongIndex", JSON.stringify(savedData));
+  } else {
+    console.warn("Index out of bounds:", index);
+  }
 }
 
 function next() {
   const songs = playlists[currentPlaylistName] || [];
+  audio.src = `file://${songs[currentIndex].path}`
 
   if (repeatMode === 2) {
     playNewTrack(songs[currentIndex].path);
   } else {
-    currentIndex = (currentIndex + 1) % songs.length;
+    currentIndex = (currentIndex + 1) % playlists[currentPlaylistName].length;
+    saveCurrentSongIndex(currentIndex);
 
     if (currentIndex === 0 && repeatMode === 0) {
       audio.pause();
       playStopButton.innerHTML = '<img src="img/play.png" alt="play" />';
       return;
     }
-
+    displayPlaylist();
     playNewTrack(songs[currentIndex].path);
   }
 
@@ -522,6 +588,7 @@ function next() {
 function previous() {
   const songs = playlists[currentPlaylistName] || [];
   currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+  saveCurrentSongIndex(currentIndex);
   audio.src = `file://${songs[currentIndex].path}`;
   audio.play();
   playStopButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
@@ -1090,3 +1157,113 @@ function hideLoaderAndShowApp() {
   }
 }
 
+function saveCurrentSongIndex(index) {
+  const songs = playlists[currentPlaylistName] || [];
+  if (index >= 0 && index < songs.length) {
+    const savedData = {
+      playlist: currentPlaylistName,
+      index: index,
+    };
+    localStorage.setItem("currentSongIndex", JSON.stringify(savedData));
+  } else {
+    console.warn("Index out of bounds:", index);
+  }
+}
+
+async function loadCurrentSongIndex() {
+  const savedData = JSON.parse(localStorage.getItem("currentSongIndex"));
+
+  if (savedData && savedData.playlist && savedData.index !== undefined) {
+    const { playlist, index } = savedData;
+
+    // Перевіряємо наявність плейлиста та пісні
+    if (playlists[playlist] && playlists[playlist][index]) {
+      currentPlaylistName = playlist;
+      currentIndex = index;
+
+      const filePath = playlists[playlist][index].path;
+      await loadSong(filePath); // Завантажуємо пісню без автоматичного запуску
+    } else {
+      console.warn(
+        "Saved playlist or song index is invalid. Resetting to defaults."
+      );
+      resetToDefaultPlaylist();
+    }
+  } else {
+    console.warn("No saved song index found. Loading default playlist.");
+    resetToDefaultPlaylist();
+  }
+}
+
+
+async function loadSong(filePath) {
+  const exists = await window.electronAPI.checkFileExists(filePath);
+
+  if (!exists) {
+    console.warn(`File not found: ${filePath}, removing from playlists`);
+    removeTrackFromPlaylistsByPath(filePath);
+    saveAllPlaylists();
+    displayPlaylist();
+    return;
+  }
+
+  const metadata = await window.electronAPI.getMetadata(filePath);
+  const song = playlists[currentPlaylistName].find((s) => s.path === filePath);
+  const songTitle = song ? song.title : "Unknown Title";
+  const artist = song ? song.artist : "Unknown Artist";
+
+  let coverImageURL = "img/songback.png";
+  if (metadata && metadata.image && metadata.image.data) {
+    const arrayBuffer = new Uint8Array(metadata.image.data).buffer;
+    const blob = new Blob([arrayBuffer], { type: metadata.image.mime });
+    coverImageURL = URL.createObjectURL(blob);
+  }
+
+  try {
+    const response = await fetch(`file://${filePath}`);
+    if (response.ok) {
+      const blob = await response.blob();
+      const audioURL = URL.createObjectURL(blob);
+      audio.src = audioURL; // Завантажуємо файл у плеєр
+    } else {
+      console.error(`Failed to load audio file from path ${filePath}`);
+      return;
+    }
+  } catch (error) {
+    console.error(`Failed to load audio file from path ${filePath}:`, error);
+    return;
+  }
+
+  // Оновлюємо метадані плеєра
+  const songNameElement = document.querySelector(".song-data .name");
+  const artistElement = document.querySelector(".song-data .artist");
+  const coverImageElement = document.getElementById("cover-image");
+
+  if (songNameElement) {
+    songNameElement.textContent = songTitle;
+    applyScrollingIfNeeded(songNameElement);
+  }
+  if (artistElement) {
+    artistElement.textContent = artist;
+    applyScrollingIfNeeded(artistElement);
+  }
+  if (coverImageElement) {
+    coverImageElement.src = coverImageURL;
+
+    coverImageElement.onerror = () => {
+      coverImageElement.src = "img/songback.png";
+    };
+  }
+
+  isPlaying = false; // Зупиняємо автоматичне відтворення
+}
+
+function resetToDefaultPlaylist() {
+  currentPlaylistName = "All";
+  currentIndex = 0;
+  if (playlists["All"] && playlists["All"][0]) {
+    const filePath = playlists["All"][0].path;
+    loadSong(filePath);
+  }
+}
+ 

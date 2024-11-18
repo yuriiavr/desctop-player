@@ -97,6 +97,20 @@ ipcMain.handle("choose-chrome-path", async () => {
   return null;
 });
 
+ipcMain.handle("loadPlaylists", async () => {
+  const filePath = path.join(app.getPath("userData"), "playlists.json");
+  if (fs.existsSync(filePath)) {
+    const data = fs.readFileSync(filePath);
+    return JSON.parse(data);
+  }
+  return {};
+});
+
+ipcMain.handle("savePlaylists", async (event, playlists) => {
+  const filePath = path.join(app.getPath("userData"), "playlists.json");
+  fs.writeFileSync(filePath, JSON.stringify(playlists, null, 2));
+});
+
 app.on("ready", () => {
   const settings = loadSettings();
   const isFullscreen = settings.isFullscreen;
@@ -131,9 +145,20 @@ app.on("ready", () => {
     mainWindow.webContents.send("app-ready", isFullscreen);
   });
 
-  globalShortcut.register("Ctrl+M", () => {
-    toggleFullscreen();
-  });
+  function registerHotkey() {
+    globalShortcut.register("Ctrl+F", () => {
+      toggleFullscreen();
+    });
+    globalShortcut.register("F11", () => {
+      toggleFullscreen();
+    });
+  }
+
+  function unregisterHotkey() {
+    globalShortcut.unregister("Ctrl+F");
+    globalShortcut.unregister("F11");
+  }
+
 
   function toggleFullscreen() {
     const isCurrentlyFullscreen = mainWindow.isFullScreen();
@@ -172,6 +197,32 @@ app.on("ready", () => {
       mainWindow.webContents.send("fullscreen-mode", true);
     }
   }
+
+  mainWindow.on("focus", () => {
+    registerHotkey();
+  });
+
+  mainWindow.on("blur", () => {
+    unregisterHotkey();
+  });
+
+  globalShortcut.register("CommandOrControl+R", () => {
+    console.log("Reload is disabled.");
+  });
+
+  globalShortcut.register("CommandOrControl+Shift+I", () => {
+    console.log("DevTools are disabled.");
+  });
+
+  // Вимкнення доступу до DevTools через меню
+  mainWindow.webContents.on("before-input-event", (event, input) => {
+    if (input.control && input.key.toLowerCase() === "r") {
+      event.preventDefault();
+    }
+    if (input.control && input.shift && input.key.toLowerCase() === "i") {
+      event.preventDefault();
+    }
+  });
 });
 
 function saveFullscreenScreen(screenBounds) {

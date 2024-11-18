@@ -3,7 +3,7 @@
 Melomaniac is a desktop music player with the ability to download music from YouTube. This application provides users with an intuitive interface for managing playlists, playing music, and downloading tracks directly from YouTube.
 
 📄 **[Read this in Ukrainian / Читати українською](READMEua.md)**
-
+📄 **[Hotkeys](Hotkeys.md)**
 ## Features
 - **Music Playback:** The player supports the playback of music files added to playlists.
 - **YouTube Downloads:** Download music from YouTube by inserting the video link.

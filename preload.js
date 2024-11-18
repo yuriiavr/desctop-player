@@ -5,7 +5,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getMetadata: (filePath) => {
         try {
           const tags = NodeID3.read(filePath);
-          console.log("ID3 Tags retrieved:", tags);
           if (tags && tags.image) {
             return {
               ...tags,
@@ -47,4 +46,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getWindowMode: () => ipcRenderer.invoke("get-window-mode"),
     saveWindowPosition: (position) => ipcRenderer.invoke("save-window-position", position),
     getWindowPosition: () => ipcRenderer.invoke("get-window-position"),
+    startWindowDrag: () => ipcRenderer.sendSync("start-window-drag"),
+    updateWindowPosition: (data) =>
+      ipcRenderer.send("update-window-position", data),
 });  
