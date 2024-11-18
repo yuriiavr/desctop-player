@@ -3,6 +3,7 @@ const openDownloadBtn = document.getElementById("ytdownload");
 const openSettingsBtn = document.getElementById("settings");
 
 const openListWrap = document.getElementById("playlist-wrap");
+const openMiniPlaylist = document.getElementById("playlistMini")
 const openDownloadWrap = document.getElementById("download-wrap");
 const openSettingsWrap = document.getElementById("settings-wrap");
 
@@ -15,6 +16,10 @@ function toggleExclusive(openElement, ...closeElements) {
   }
   saveDisplayState();
 }
+
+openMiniPlaylist.addEventListener("click", function() {
+  openListWrap.style.display = "flex"
+})
 
 openListBtn.addEventListener("click", function () {
   toggleExclusive(openListWrap, openDownloadWrap, openSettingsWrap);
@@ -225,85 +230,77 @@ basicFontFamilySelect.addEventListener("change", () => {
 loadDisplayState();
 loadClockSettings();
 
-const wrap = document.querySelector(".wrap");
+  
+document.addEventListener("DOMContentLoaded", () => {
+  const wrap = document.querySelector(".wrap");
 
-const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
-if (savedPosition) {
-  wrap.style.left = savedPosition.left;
-  wrap.style.top = savedPosition.top;
-}
-
-const grabCont = document.querySelector(".player-top");
-let isDragging = false;
-let offset = { x: 0, y: 0 };
-
-grabCont.addEventListener("mousedown", (e) => {
-  if (e.button !== 0) return;
-  const playerTop = e.target.closest(".player-top");
-  if (playerTop) {
-    isDragging = true;
-    const rect = wrap.getBoundingClientRect();
-    offset = {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
-    grabCont.style.cursor = "grabbing";
+  // Завантажуємо позицію wrap
+  const savedWrapPosition = JSON.parse(localStorage.getItem("wrapPosition"));
+  if (savedWrapPosition) {
+    wrap.style.left = savedWrapPosition.left;
+    wrap.style.top = savedWrapPosition.top;
   }
-  e.preventDefault();
+
+  const grabCont = document.querySelector(".player-top");
+  let isDraggingWrap = false; // Відслідковуємо тільки wrap
+  let offset = { x: 0, y: 0 };
+
+  // Початок перетягування wrap
+  grabCont.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return;
+
+    const playerTop = e.target.closest(".player-top");
+    if (playerTop) {
+      isDraggingWrap = true; // Відмічаємо, що перетягуємо wrap
+      const rect = wrap.getBoundingClientRect();
+      offset = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+      grabCont.style.cursor = "grabbing";
+    }
+    e.preventDefault();
+  });
+
+  // Завершення перетягування wrap
+  document.addEventListener("mouseup", () => {
+    if (isDraggingWrap) {
+      grabCont.style.cursor = "grab";
+      isDraggingWrap = false;
+
+      // Зберігаємо позицію wrap
+      localStorage.setItem(
+        "wrapPosition",
+        JSON.stringify({
+          left: wrap.style.left,
+          top: wrap.style.top,
+        })
+      );
+    }
+  });
+
+  // Перетягування wrap
+  document.addEventListener("mousemove", (e) => {
+    if (isDraggingWrap) {
+      let newX = e.clientX - offset.x;
+      let newY = e.clientY - offset.y;
+
+      const bodyRect = document.body.getBoundingClientRect();
+      const wrapRect = wrap.getBoundingClientRect();
+
+      if (newX < 0) newX = 0;
+      if (newY < 0) newY = 0;
+      if (newX + wrapRect.width > bodyRect.width)
+        newX = bodyRect.width - wrapRect.width;
+      if (newY + wrapRect.height > bodyRect.height)
+        newY = bodyRect.height - wrapRect.height;
+
+      wrap.style.left = `${newX}px`;
+      wrap.style.top = `${newY}px`;
+    }
+  });
 });
 
-grabCont.addEventListener("dblclick", () => {
-  const bodyRect = document.body.getBoundingClientRect();
-  const wrapRect = wrap.getBoundingClientRect();
-
-  const centerX = (bodyRect.width - wrapRect.width) / 2;
-  const centerY = (bodyRect.height - wrapRect.height) / 2;
-
-  wrap.style.left = `${centerX}px`;
-  wrap.style.top = `${centerY}px`;
-
-  localStorage.setItem(
-    "wrapPosition",
-    JSON.stringify({
-      left: wrap.style.left,
-      top: wrap.style.top,
-    })
-  );
-});
-
-document.addEventListener("mouseup", () => {
-  if (isDragging) {
-    grabCont.style.cursor = "grab";
-    isDragging = false;
-    localStorage.setItem(
-      "wrapPosition",
-      JSON.stringify({
-        left: wrap.style.left,
-        top: wrap.style.top,
-      })
-    );
-  }
-});
-
-document.addEventListener("mousemove", (e) => {
-  if (isDragging) {
-    let newX = e.clientX - offset.x;
-    let newY = e.clientY - offset.y;
-
-    const bodyRect = document.body.getBoundingClientRect();
-    const wrapRect = wrap.getBoundingClientRect();
-
-    if (newX < 0) newX = 0;
-    if (newY < 0) newY = 0;
-    if (newX + wrapRect.width > bodyRect.width)
-      newX = bodyRect.width - wrapRect.width;
-    if (newY + wrapRect.height > bodyRect.height)
-      newY = bodyRect.height - wrapRect.height;
-
-    wrap.style.left = `${newX}px`;
-    wrap.style.top = `${newY}px`;
-  }
-});
 
 const savedClockPosition = JSON.parse(localStorage.getItem("clockPosition"));
 if (savedClockPosition) {
@@ -369,39 +366,111 @@ document.addEventListener("DOMContentLoaded", () => {
   const dragBar = document.getElementById("drag-bar");
   const playerWrapper = document.querySelector(".player");
   const fullPlayerWrapper = document.querySelector(".wrap");
+  const settingsWrap = document.getElementById("settings-wrap")
+  const downloadWrap = document.getElementById("download-wrap")
+  const playlistWrap = document.getElementById("playlist-wrap")
+  const wrap = document.querySelector(".wrap");
+  const playlistsCont = document.querySelectorAll(".playlist-cont")
+  const freeSpace = document.getElementById("space")
 
   function updateVisibilityBasedOnWindowSize() {
     const isFullscreen = window.outerWidth >= screen.width && window.outerHeight >= screen.height;
-
+  
     if (isFullscreen) {
       if (dragBar) dragBar.style.display = "none";
       if (mainFunctions) mainFunctions.style.display = "flex";
       if (offButton) offButton.style.display = "block";
-      if (playerWrapper) playerWrapper.style.borderRadius = "20px"
-      if (fullPlayerWrapper) fullPlayerWrapper.style.top = "40%"
-      if (fullPlayerWrapper) fullPlayerWrapper.style.left = "40%"
+      if (playerWrapper) playerWrapper.style.borderRadius = "20px";
+      playlistsCont.forEach(cont => {
+        if (cont) cont.style.display = "flex"
+      });
+      if (playlistWrap) playlistWrap.style.maxWidth = "600px"
+      if (freeSpace) freeSpace.style.display = "flex"
+      
+  
+      const savedPosition = JSON.parse(localStorage.getItem("wrapPosition"));
+      if (savedPosition) {
+        fullPlayerWrapper.style.left = savedPosition.left;
+        fullPlayerWrapper.style.top = savedPosition.top;
+      } else {
+        const bodyRect = document.body.getBoundingClientRect();
+        const wrapRect = fullPlayerWrapper.getBoundingClientRect();
+        fullPlayerWrapper.style.left = `${(bodyRect.width - wrapRect.width) / 2}px`;
+        fullPlayerWrapper.style.top = `${(bodyRect.height - wrapRect.height) / 2}px`;
+      }
     } else {
       if (dragBar) dragBar.style.display = "flex";
       if (mainFunctions) mainFunctions.style.display = "none";
       if (offButton) offButton.style.display = "none";
-      if (playerWrapper) playerWrapper.style.borderRadius = "0px"
-      if (fullPlayerWrapper) fullPlayerWrapper.style.top = "0"
-      if (fullPlayerWrapper) fullPlayerWrapper.style.left = "0"
+      if (playerWrapper) playerWrapper.style.borderRadius = "0px";
+      fullPlayerWrapper.style.left = "0";
+      fullPlayerWrapper.style.top = "0";
+      if (settingsWrap) settingsWrap.style.display = "none";
+      if (downloadWrap) downloadWrap.style.display = "none";
+      if (playlistWrap) playlistWrap.style.display = "none";
+      playlistsCont.forEach((cont, index) => {
+        if ((index + 1) % 2 === 0) { cont.style.display = "none"}
+      });
+      if (playlistWrap) playlistWrap.style.maxWidth = "450px"
+      if (freeSpace) freeSpace.style.display = "none"
     }
   }
+
+  function updateDisplayBasedOnWindowSize() {
+    const isSmallVersion = window.innerWidth <= 500;
+  
+    if (isSmallVersion) {
+      coverImage.style.display = "none";
+      imageSwitch.checked = true;
+      player.style.padding = "30px 0";
+      player.style.width = "500px";
+      wrap.style.width = "500px";
+  
+      const imageSize = "40px";
+      playImg.style.width = imageSize;
+      controlsImgs.forEach((img) => (img.style.width = imageSize));
+      volumeImg.style.display = "none";
+    } else {
+      const savedImageDisplay = localStorage.getItem("coverImageDisplay");
+      coverImage.style.display = savedImageDisplay || "block";
+      imageSwitch.checked = savedImageDisplay === "none";
+  
+      player.style.padding = savedImageDisplay === "none" ? "30px 0" : "90px 0";
+      player.style.width = savedImageDisplay === "none" ? "500px" : "600px";
+      wrap.style.width = savedImageDisplay === "none" ? "500px" : "600px";
+  
+      const imageSize = savedImageDisplay === "none" ? "40px" : "50px";
+      playImg.style.width = imageSize;
+      controlsImgs.forEach((img) => (img.style.width = imageSize));
+      volumeImg.style.display = savedImageDisplay === "none" ? "none" : "block";
+    }
+  }
+
+  window.addEventListener("resize", updateDisplayBasedOnWindowSize);
+
+  updateDisplayBasedOnWindowSize();
+
+  imageSwitch.addEventListener("change", () => {
+    if (window.innerWidth > 500) { 
+      coverImage.style.display = imageSwitch.checked ? "none" : "block";
+      localStorage.setItem("coverImageDisplay", coverImage.style.display);
+  
+      player.style.padding = imageSwitch.checked ? "30px 0" : "90px 0";
+      player.style.width = imageSwitch.checked ? "500px" : "600px";
+      wrap.style.width = imageSwitch.checked ? "500px" : "600px";
+  
+      const imageSize = imageSwitch.checked ? "40px" : "50px";
+      playImg.style.width = imageSize;
+      controlsImgs.forEach((img) => (img.style.width = imageSize));
+      volumeImg.style.display = imageSwitch.checked ? "none" : "block";
+    }
+  });
 
   updateVisibilityBasedOnWindowSize();
 
   window.addEventListener("resize", updateVisibilityBasedOnWindowSize);
 
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "F11") {
-      setTimeout(updateVisibilityBasedOnWindowSize, 500);
-      window.resizeTo(500, 300);
-    }
-  });
-
-  document.addEventListener("keydown", (event) => {
+  document.addEventListener("keydown", (event) => { 
     if (event.ctrlKey && event.key === "m") {
       window.resizeTo(500, 300);
       setTimeout(updateVisibilityBasedOnWindowSize, 500);
@@ -468,6 +537,8 @@ const player = document.querySelector(".player");
 const controlsImgs = document.querySelectorAll(".controlls img");
 const volumeImg = document.querySelector(".volume img");
 const playImg = document.querySelector("#play img");
+const wrap = document.querySelector(".wrap");
+
 
 const savedImageDisplay = localStorage.getItem("coverImageDisplay");
 if (savedImageDisplay) {
@@ -534,4 +605,24 @@ otherBtn.addEventListener("click", () => {
   soundBtn.classList.remove("setting-btn-active");
   visualBtn.classList.remove("setting-btn-active");
   otherBtn.classList.add("setting-btn-active");
+});
+
+function scrollToActiveSong() {
+  const playlist = document.querySelector("#playlist.scrollbar");
+  const activeSong = playlist.querySelector(".song-name[style*='font-weight: bold;']");
+
+  if (activeSong) {
+    activeSong.scrollIntoView({ behavior: "smooth", block: "center" });
+    console.log("Scrolled to active song:", activeSong.textContent);
+  }
+}
+
+openListBtn.addEventListener("click", function () {
+  toggleExclusive(openListWrap, openDownloadWrap, openSettingsWrap);
+  scrollToActiveSong();
+});
+
+openMiniPlaylist.addEventListener("click", function () {
+  openListWrap.style.display = "flex";
+  scrollToActiveSong();
 });

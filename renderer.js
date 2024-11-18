@@ -28,6 +28,48 @@ document.addEventListener("DOMContentLoaded", async () => {
   const loader = document.getElementById("loader");
   const appContent = document.getElementById("app");
   let appReady = false;
+  const mode = await window.electronAPI.getWindowMode();
+  const fullPlayerWrapper = document.querySelector(".wrap");
+
+  if (mode === "minimized") {
+    fullPlayerWrapper.style.left = "0";
+    fullPlayerWrapper.style.top = "0";
+  } 
+
+  const dragBar = document.querySelector(".player-top");
+  let isDraggingWindow = false;
+  let windowOffset = { x: 0, y: 0 };
+
+  dragBar.addEventListener("mousedown", (e) => {
+    if (e.button !== 0) return;
+
+    isDraggingWindow = true;
+    const bounds = window.electronAPI.startWindowDrag(); // Отримуємо bounds вікна
+    windowOffset = {
+      x: e.clientX - bounds.x,
+      y: e.clientY - bounds.y,
+    };
+    document.body.style.cursor = "grabbing";
+  });
+
+  // Завершення перетягування вікна
+  document.addEventListener("mouseup", () => {
+    if (isDraggingWindow) {
+      isDraggingWindow = false;
+      document.body.style.cursor = "default";
+      window.electronAPI.saveWindowPosition(); // Зберігаємо позицію вікна
+    }
+  });
+
+  // Перетягування вікна
+  document.addEventListener("mousemove", (e) => {
+    if (isDraggingWindow) {
+      const deltaX = e.clientX - windowOffset.x;
+      const deltaY = e.clientY - windowOffset.y;
+
+      window.electronAPI.updateWindowPosition({ deltaX, deltaY });
+    }
+  });
 
   window.electronAPI.onAppReady(() => {
     appReady = true;

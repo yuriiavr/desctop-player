@@ -43,5 +43,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     showMainWindow: () => {
         ipcRenderer.send('show-main-window');
-    }
+    },
+    getWindowMode: () => ipcRenderer.invoke("get-window-mode"),
+    saveWindowPosition: (position) => ipcRenderer.invoke("save-window-position", position),
+    getWindowPosition: () => ipcRenderer.invoke("get-window-position"),
 });  

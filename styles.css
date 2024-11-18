@@ -1345,8 +1345,18 @@ svg[height='0'] { position: absolute }
   background-color: transparent;
   border: none;
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 65px;
+  right: 10px;
+  cursor: pointer;
+}
+
+#playlistMini{
+  background-color: transparent;
+  border: none;
+  position: absolute;
+  top: 65px;
+  left: 10px;
+  cursor: pointer;
 }
 
 .no-repeat,
