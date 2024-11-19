@@ -14,7 +14,7 @@ Melomaniac is a desktop music player with the ability to download music from You
 - **Customization:** Extensive customization options allow users to adjust the appearance and functionality of the player to their preferences.
 
 ## Installation and Launch
-1. **Download:** Download the latest version of the application [Melomaniac.rar](https://github.com/yuriiavr/desctop-player/releases/download/Melomaniac2.0/Melomaniac2.0.0.zip).
+1. **Download:** Download the latest version of the application [Melomaniac.zip](https://github.com/yuriiavr/desctop-player/releases/download/Melomaniac2.0/Melomaniac2.0.zip).
 2. **Installation:** Extract "Melomaniac.rar" and install the application by opening "Melomaniac Setup 1.2.0.exe".
 3. **Launch:** Navigate to the folder where you installed the player and open Melomaniac.exe, or use the desktop shortcut.
 
