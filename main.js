@@ -145,6 +145,14 @@ app.on("ready", () => {
     mainWindow.webContents.send("app-ready", isFullscreen);
   });
 
+  mainWindow.webContents.setZoomFactor(1); 
+  mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.control && (input.key === '+' || input.key === '-' || input.key === '0')) {
+      event.preventDefault();
+    }
+  });
+
   function registerHotkey() {
     globalShortcut.register("Ctrl+F", () => {
       toggleFullscreen();
@@ -152,13 +160,22 @@ app.on("ready", () => {
     globalShortcut.register("F11", () => {
       toggleFullscreen();
     });
+
+    globalShortcut.register("CommandOrControl+R", () => {
+      console.log("Reload is disabled.");
+    });
+  
+    globalShortcut.register("CommandOrControl+Shift+I", () => {
+      console.log("DevTools are disabled.");
+    });
   }
 
   function unregisterHotkey() {
     globalShortcut.unregister("Ctrl+F");
     globalShortcut.unregister("F11");
+    globalShortcut.unregister("CommandOrControl+Shift+I")
+    globalShortcut.unregister("CommandOrControl+R")
   }
-
 
   function toggleFullscreen() {
     const isCurrentlyFullscreen = mainWindow.isFullScreen();
@@ -206,14 +223,6 @@ app.on("ready", () => {
     unregisterHotkey();
   });
 
-  globalShortcut.register("CommandOrControl+R", () => {
-    console.log("Reload is disabled.");
-  });
-
-  globalShortcut.register("CommandOrControl+Shift+I", () => {
-    console.log("DevTools are disabled.");
-  });
-
   // Вимкнення доступу до DevTools через меню
   mainWindow.webContents.on("before-input-event", (event, input) => {
     if (input.control && input.key.toLowerCase() === "r") {
@@ -227,19 +236,19 @@ app.on("ready", () => {
 
 function saveFullscreenScreen(screenBounds) {
   const settings = loadSettings();
-  settings.fullscreenScreen = screenBounds; // Збереження bounds екрану
+  settings.fullscreenScreen = screenBounds;
   saveSettings(settings);
 }
 
 function saveSmallWindowPosition(x, y) {
   const settings = loadSettings();
-  settings.smallWindowPosition = { x, y }; // Позиція вікна
+  settings.smallWindowPosition = { x, y };
   saveSettings(settings);
 }
 
 function getSmallWindowPosition() {
   const settings = loadSettings();
-  return settings.smallWindowPosition || { x: 0, y: 0 }; // Позиція за замовчуванням
+  return settings.smallWindowPosition || { x: 0, y: 0 };
 }
 
 function saveWindowSettings(isFullscreen) {
@@ -309,7 +318,7 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
       clipboard.writeText(youtubeUrl);
 
       const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         slowMo: 5,
         args: [
           "--no-sandbox",

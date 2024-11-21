@@ -1266,4 +1266,3 @@ function resetToDefaultPlaylist() {
     loadSong(filePath);
   }
 }
- 
