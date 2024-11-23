@@ -13,6 +13,11 @@ const puppeteer = require("puppeteer-extra");
 const AdblockerPlugin = require("puppeteer-extra-plugin-adblocker");
 const os = require("os");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const net = require("net");
+
+const PIPE_PATH = "\\\\.\\pipe\\electron_voice_player";
+
+let voiceAssistantConnected = false;
 
 puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
@@ -21,6 +26,41 @@ let mainWindow;
 
 const settingsPath = path.join(app.getPath("userData"), "settings.json");
 let customChromePath = loadCustomChromePath();
+
+let connections = 0; 
+const server = net.createServer((socket) => {
+  connections += 1;
+  console.log("Voice assistant connected to player. Active connections:", connections);
+
+  socket.on("data", (data) => {
+    try {
+      const command = JSON.parse(data.toString().trim());
+      handleVoiceCommand(command.action); 
+    } catch (error) {
+      console.error("Error parsing command:", error);
+    }
+  });
+
+  socket.on("end", () => {
+    connections -= 1;
+    console.log("Voice assistant disconnected. Active connections:", connections);
+  });
+
+  socket.on("error", (err) => {
+    console.error("Socket error:", err);
+  });
+});
+
+// Запускаємо сервер на пайпі
+server.listen(PIPE_PATH, () => {
+  console.log(`Listening on pipe: ${PIPE_PATH}`);
+});
+
+// Обробка команд
+function handleVoiceCommand(action) {
+  console.log("Handling voice command:", action);
+  mainWindow.webContents.send("voice-command", { action });
+}
 
 function loadCustomChromePath() {
   if (fs.existsSync(settingsPath)) {
@@ -147,6 +187,7 @@ app.on("ready", () => {
 
   mainWindow.webContents.setZoomFactor(1); 
   mainWindow.webContents.setVisualZoomLevelLimits(1, 1);
+
   mainWindow.webContents.on('before-input-event', (event, input) => {
     if (input.control && (input.key === '+' || input.key === '-' || input.key === '0')) {
       event.preventDefault();
@@ -197,10 +238,8 @@ app.on("ready", () => {
       saveWindowSettings(false);
       mainWindow.webContents.send("fullscreen-mode", false);
     } else {
-      // Вхід у повноекранний режим
       const bounds = mainWindow.getBounds();
 
-      // Зберігаємо поточну позицію вікна перед переходом
       saveSmallWindowPosition(bounds.x, bounds.y);
 
       mainWindow.setBounds({
@@ -223,7 +262,6 @@ app.on("ready", () => {
     unregisterHotkey();
   });
 
-  // Вимкнення доступу до DevTools через меню
   mainWindow.webContents.on("before-input-event", (event, input) => {
     if (input.control && input.key.toLowerCase() === "r") {
       event.preventDefault();
@@ -259,7 +297,19 @@ function saveWindowSettings(isFullscreen) {
 
 app.on("will-quit", () => {
   globalShortcut.unregisterAll();
+
+  if (fs.existsSync(PIPE_PATH)) {
+    try {
+      fs.unlinkSync(PIPE_PATH);
+      console.log(`Pipe ${PIPE_PATH} successfully unlinked.`);
+    } catch (error) {
+      console.error(`Failed to unlink pipe ${PIPE_PATH}:`, error);
+    }
+  } else {
+    console.log(`Pipe ${PIPE_PATH} does not exist. Skipping unlink.`);
+  }
 });
+
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
@@ -318,7 +368,7 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
       clipboard.writeText(youtubeUrl);
 
       const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         slowMo: 5,
         args: [
           "--no-sandbox",
@@ -373,7 +423,7 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
         progress: 40,
       });
       await page.goto(
-        "https://ytshorts.savetube.me/14-youtube-music-downloader-2eree3?id=497895709"
+        "https://y2meta.app/en/youtube-to-mp3/uIKWMoqYPIU"
       );
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -390,26 +440,19 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
         stage: "Searching...",
         progress: 50,
       });
-      await page.waitForSelector('input[type="search"]');
-      await page.focus('input[type="search"]');
-      await page.type('input[type="search"]', youtubeUrl);
+      await page.waitForSelector('input#txt-url');
+      await page.focus('input#txt-url');
+      await page.type('input#txt-url', youtubeUrl);
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      mainWindow.webContents.send("update-progress", {
-        stage: "Getting Link",
-        progress: 60,
-      });
-      await page.waitForSelector("#downloadSection");
-      await page.waitForSelector("#downloadSection button", { timeout: 60000 });
-      await page.click("#downloadSection button");
+      await page.click("#btn-submit");
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      await page.click("#process_mp3");
       mainWindow.webContents.send("update-progress", {
         stage: "Download is starting",
-        progress: 70,
+        progress: 60,
       });
-      await page.waitForSelector("a[download]", { timeout: 60000 });
-      await page.click("a[download]");
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await page.click('a[type="button"].btn-success.btn-download-link');
 
       mainWindow.webContents.send("update-progress", {
         stage: "Checking Download",
@@ -434,7 +477,7 @@ ipcMain.on("start-download", async (event, youtubeUrl) => {
 
       dialog.showMessageBoxSync({
         message:
-          "You may close this window once the MP3 file is in the Downloads folder.",
+          "You may close this window ONLY when the MP3 file is in the Downloads folder.",
       });
 
       await browser.close();

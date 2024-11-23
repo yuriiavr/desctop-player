@@ -41,29 +41,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   } 
 
   const dragBar = document.querySelector(".player-top");
-  let isDraggingWrap = false; // Для wrap
+  let isDraggingWrap = false;
   let offset = { x: 0, y: 0 };
 
   function isSmallWindow() {
-    return window.innerWidth <= 500; // Маленьке вікно визначається як ширина <= 500px
+    return window.innerWidth <= 500;
   }
 
   function resetWrapPositionIfSmallWindow() {
     if (isSmallWindow()) {
       wrap.style.left = "0";
       wrap.style.top = "0";
-      wrap.style.position = "absolute"; // Переконуємося, що позиція встановлена як абсолютна
-      localStorage.removeItem("wrapPosition"); // Не зберігаємо позицію для маленького вікна
+      wrap.style.position = "absolute";
+      localStorage.removeItem("wrapPosition");
     }
   }
 
-  // Завершення перетягування вікна
   document.addEventListener("mouseup", () => {
     if (isDraggingWrap) {
       isDraggingWrap = false;
       document.body.style.cursor = "default";
 
-      // Зберігаємо позицію wrap у localStorage
       localStorage.setItem(
         "wrapPosition",
         JSON.stringify({
@@ -74,7 +72,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Перетягування вікна
   document.addEventListener("mousemove", (e) => {
     if (isDraggingWrap) {
       const newX = e.clientX - offset.x;
@@ -109,9 +106,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     resetWrapPositionIfSmallWindow();
   }
 
-  // Подвійний клік для центрування wrap
   dragBar.addEventListener("dblclick", () => {
-    if (isSmallWindow()) return; // Не дозволяємо центрування в маленькому вікні
+    if (isSmallWindow()) return;
 
     const bodyRect = document.body.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
@@ -122,7 +118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     wrap.style.left = `${newLeft}px`;
     wrap.style.top = `${newTop}px`;
 
-    // Зберігаємо нову позицію
     localStorage.setItem(
       "wrapPosition",
       JSON.stringify({ left: `${newLeft}px`, top: `${newTop}px` })
@@ -169,13 +164,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     playlistsDropdown.addEventListener("click", (event) => {
       event.stopPropagation();
       const selectedPlaylist = event.target.textContent;
+    
       if (selectedPlaylist in playlists) {
         currentPlaylistName = selectedPlaylist;
         playlistsDiv.textContent = selectedPlaylist;
         playlistsDropdown.style.display = "none";
+    
+        const songs = playlists[currentPlaylistName] || [];
+        const playingSongPath = audio.src.replace("file://", "");
+    
+        const playingSongIndex = songs.findIndex((song) => song.path === playingSongPath);
+    
+        if (playingSongIndex !== -1) {
+          currentIndex = playingSongIndex;
+        } else {
+          currentIndex = -1;
+        }
+    
         displayPlaylist();
       }
     });
+     
 
     document.addEventListener("click", (event) => {
       if (
@@ -241,7 +250,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           contextMenu.remove();
         }
 
-        // Create context menu
         contextMenu = document.createElement("div");
         contextMenu.className = "context-menu";
         contextMenu.style.position = `fixed`;
@@ -347,13 +355,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     sortable = new Sortable(playlistElement, {
       animation: 150,
       onEnd: () => {
-        reorderPlaylist();
+        const playingSongPath = audio.src.replace("file://", "");
+  
+        playlists[currentPlaylistName] = Array.from(playlistElement.children).map(
+          (item) => {
+            const index = parseInt(item.getAttribute("data-index"));
+            return playlists[currentPlaylistName][index];
+          }
+        );
+  
+        currentIndex = playlists[currentPlaylistName].findIndex(
+          (song) => song.path === playingSongPath
+        );
+  
         saveAllPlaylists();
+        displayPlaylist();
       },
     });
   }
+  
+  
 
-  // Volume and progress bar controls
   const volumeControl = document.getElementById("volumeControl");
   if (volumeControl) {
     volumeControl.addEventListener("input", (event) => {
@@ -376,6 +398,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       contextMenu.remove();
     }
   });
+});
+
+console.log("Renderer process is running");
+
+window.electronAPI.onVoiceCommand((command) => {
+  console.log("Received voice command in renderer.js:", command);
 });
 
 function toggleRepeatMode() {
@@ -438,10 +466,24 @@ function removeTrackFromPlaylistsByPath(path) {
 
 document.getElementById("playlist").addEventListener("click", (event) => {
   if (event.target.tagName === "LI") {
-    const filePath = event.target.getAttribute("data-path");
-    playNewTrack(filePath);
+    const clickedIndex = parseInt(event.target.getAttribute("data-index"));
+    if (clickedIndex !== currentIndex) {
+      currentIndex = clickedIndex; 
+      const songs = playlists[currentPlaylistName] || [];
+      if (songs[currentIndex]) {
+        const filePath = songs[currentIndex].path;
+        playNewTrack(filePath); 
+        displayPlaylist()
+
+        const playButton = document.getElementById("play");
+        if (playButton) {
+          playButton.innerHTML = '<img src="img/pause.png" alt="pause" />';
+        }
+      }
+    }
   }
 });
+
 
 async function loadAllPlaylists() {
   playlists = (await window.electronAPI.loadPlaylists()) || {};
@@ -516,6 +558,7 @@ function displayPlaylist() {
     : "";
 
   const songs = playlists[currentPlaylistName] || [];
+  const playingSongPath = audio.src.replace("file://", "");
   const filteredSongs = songs.filter((song) => {
     const title = song.title ? song.title.toLowerCase() : "";
     const artist = song.artist ? song.artist.toLowerCase() : "";
@@ -524,6 +567,7 @@ function displayPlaylist() {
 
   playlistElement.innerHTML = filteredSongs
     .map((song, index) => {
+      const isPlaying = song.path === playingSongPath;
       const title = song.title || "Unknown Title";
       const artist = song.artist || "Unknown Artist";
       return `<li id="song-name" class="song-name" ${
@@ -797,15 +841,17 @@ audio.addEventListener("timeupdate", updateProgressBar);
 audio.addEventListener("loadedmetadata", updateProgressBar);
 
 function updateAllPlaylist() {
-  playlists["All"] = Object.keys(playlists)
-    .filter((name) => name !== "All")
-    .reduce((allSongs, playlistName) => {
-      return allSongs.concat(playlists[playlistName]);
-    }, [])
-    .filter(
-      (song, index, self) =>
-        self.findIndex((s) => s.path === song.path) === index
-    );
+  if (!playlists["All"] || playlists["All"].length === 0) {
+    playlists["All"] = Object.keys(playlists)
+      .filter((name) => name !== "All")
+      .reduce((allSongs, playlistName) => {
+        return allSongs.concat(playlists[playlistName]);
+      }, [])
+      .filter(
+        (song, index, self) =>
+          self.findIndex((s) => s.path === song.path) === index
+      );
+  }
 }
 
 function sortPlaylist(criteria) {
@@ -1176,13 +1222,12 @@ async function loadCurrentSongIndex() {
   if (savedData && savedData.playlist && savedData.index !== undefined) {
     const { playlist, index } = savedData;
 
-    // Перевіряємо наявність плейлиста та пісні
     if (playlists[playlist] && playlists[playlist][index]) {
       currentPlaylistName = playlist;
       currentIndex = index;
 
       const filePath = playlists[playlist][index].path;
-      await loadSong(filePath); // Завантажуємо пісню без автоматичного запуску
+      await loadSong(filePath);
     } else {
       console.warn(
         "Saved playlist or song index is invalid. Resetting to defaults."
@@ -1224,7 +1269,7 @@ async function loadSong(filePath) {
     if (response.ok) {
       const blob = await response.blob();
       const audioURL = URL.createObjectURL(blob);
-      audio.src = audioURL; // Завантажуємо файл у плеєр
+      audio.src = audioURL;
     } else {
       console.error(`Failed to load audio file from path ${filePath}`);
       return;
@@ -1234,7 +1279,7 @@ async function loadSong(filePath) {
     return;
   }
 
-  // Оновлюємо метадані плеєра
+
   const songNameElement = document.querySelector(".song-data .name");
   const artistElement = document.querySelector(".song-data .artist");
   const coverImageElement = document.getElementById("cover-image");
@@ -1255,7 +1300,7 @@ async function loadSong(filePath) {
     };
   }
 
-  isPlaying = false; // Зупиняємо автоматичне відтворення
+  isPlaying = false;
 }
 
 function resetToDefaultPlaylist() {
@@ -1266,3 +1311,23 @@ function resetToDefaultPlaylist() {
     loadSong(filePath);
   }
 }
+
+window.electronAPI.onVoiceCommand((command) => {
+  console.log("Command received in renderer.js:", command);
+  switch (command.action) {
+    case "play":
+      console.log("Executing play command");
+      togglePlayPause();
+      break;
+    case "next":
+      console.log("Executing next command");
+      next();
+      break;
+    case "previous":
+      console.log("Executing previous command");
+      previous();
+      break;
+    default:
+      console.warn("Unknown command:", command);
+  }
+});

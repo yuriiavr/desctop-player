@@ -49,4 +49,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
     startWindowDrag: () => ipcRenderer.sendSync("start-window-drag"),
     updateWindowPosition: (data) =>
       ipcRenderer.send("update-window-position", data),
+    onVoiceCommand: (callback) => {
+      ipcRenderer.on("voice-command", (event, command) => {
+        console.log("Command received in preload.js:", command);
+        callback(command);
+      });
+    },
+    sendMessage: (channel, data) => {
+      ipcRenderer.send(channel, data);
+    }
 });  

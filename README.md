@@ -4,8 +4,9 @@ Melomaniac is a desktop music player with the ability to download music from You
 
 📄 **[Read this in Ukrainian / Читати українською](READMEua.md)**
 
-
 📄 **[Hotkeys](Hotkeys.md)**
+
+---
 
 ## Features
 - **Music Playback:** The player supports the playback of music files added to playlists.
@@ -13,23 +14,35 @@ Melomaniac is a desktop music player with the ability to download music from You
 - **Playlist Management:** Create, rename, and delete playlists to organize your music files conveniently.
 - **Customization:** Extensive customization options allow users to adjust the appearance and functionality of the player to their preferences.
 
+---
+
 ## Installation and Launch
 1. **Download:** Download the latest version of the application [Melomaniac.zip](https://github.com/yuriiavr/desctop-player/releases/download/Melomaniac2.0/Melomaniac.2.0.zip).
 2. **Installation:** Extract "Melomaniac.rar" and install the application by opening "Melomaniac Setup 1.2.0.exe".
 3. **Launch:** Navigate to the folder where you installed the player and open Melomaniac.exe, or use the desktop shortcut.
 
+---
+
 ## How to Download Music from YouTube
-- **Set Chrome Path:** In the player's interface, open the settings. Specify the path to Chrome, e.g., `C:/Program Files/Google/Chrome/Application/chrome.exe`.
-- **Download:** In the player's interface, go to the YouTube tab. Paste the desired link and click Download. The song will appear in the "Downloads" folder on your PC. Note that the player is optimized for downloading songs! It is recommended not to download hour-long playlists or videos.
+- **Set Browser Path:** In the player's interface, open the settings. Specify the path to Chrome, e.g., `C:/Program Files/Google/Chrome/Application/chrome.exe` or other browser.exe.
+- **Download:** In the player's interface, go to the YouTube tab. Paste the desired link and click Download. 
+
+### Important:
+Before closing the modal window with the download process, ensure the downloaded song appears in the "Downloads" folder on your PC. This step prevents any issues with incomplete downloads or missing files.
+
+---
 
 ## System Requirements
 - **Operating System:** Windows 7 or later.
 - **Node.js:** Required for running in development mode.
 
+---
+
 ## Developer Commands
 - **Run in Development Mode:**
   ```bash
   npm run dev
+
 
 ## Technologies Used
 - **Electron**: For building a cross-platform desktop application.
